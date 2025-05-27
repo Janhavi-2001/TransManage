@@ -1,0 +1,119 @@
+.container {
+  max-width: 1250px;
+  max-height: 100vh;
+  margin: 0 auto;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  color: #22223b;
+  padding: 0.5rem;
+}
+
+.navbar-left .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  display: block;
+}
+
+.brandname {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar-right .nav-links {
+  list-style-type: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-right .nav-links li {
+  margin-right: 2.5rem;
+}
+
+.navbar-right .nav-links a {
+  color: #22223b;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 1.75rem;
+  padding: 0.5rem 0.75rem;
+
+}
+
+.navbar-right .nav-links a:hover {
+  background: #fdc6bd;
+  transition: 0.4s ease-in-out;
+  border-radius: 4px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.hamburger .bar {
+  height: 4px;
+  width: 100%;
+  background: #22223b;
+  margin: 2px 0;
+  border-radius: 1px;
+  transition: 0.3s;
+}
+
+@media (max-width: 900px) {
+  .navbar-right {
+    display: none;
+    position: absolute;
+    top: 64px;
+    right: 24px;
+    background: #fff;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 16px 24px;
+    z-index: 100;
+    flex-direction: column;
+  }
+
+  .navbar-right.open {
+    display: flex;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .nav-links li {
+    margin: 0;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}

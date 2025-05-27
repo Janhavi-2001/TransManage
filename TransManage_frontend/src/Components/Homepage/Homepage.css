@@ -1,0 +1,93 @@
+.container {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.homepage {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80vh;
+    padding: 30px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    gap: 50px;
+}
+
+.homepage img {
+    max-width: 525px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    order: 2;
+}
+
+.homepage h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #22223b;
+    max-width: 85%;
+    line-height: 1.4;
+}
+
+.homepage p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #4a4e69;
+    max-width: 85%;
+    line-height: 1.6;
+}
+
+.homepage .login-link,
+.homepage .demo-link {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #22223b;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+    max-width: 200px;
+    text-align: center;
+    margin-right: 10px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.homepage .login-link:hover {
+    background: #4a4e69;
+}
+
+.homepage .demo-link {
+    margin-right: 10px;
+    background: #ff705b;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.homepage .demo-link:hover {
+    background: #f7b7a3;
+}
+
+
+@media (max-width: 900px) {
+    .homepage {
+        flex-direction: column;
+        gap: 32px;
+        padding: 24px;
+        text-align: center;
+    }
+    .homepage img {
+        order: 0;
+        max-width: 90vw;
+    }
+    .homepage > *:not(img) {
+        order: 1;
+        width: 100%;
+    }
+}
