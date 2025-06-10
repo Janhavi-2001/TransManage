@@ -50,19 +50,36 @@
   text-decoration: none;
   font-weight: bold;
   margin-right: 1.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 12px 28px;
 
 }
 
 .navbar-right .nav-links a:hover {
   background: #fdc6bd;
   transition: 0.4s ease-in-out;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
+}
+
+.navbar-right .nav-links a:last-child {
+  margin-right: 0;
+}
+
+.login-button {
+  background-color: #ff705b;
+  color: #fff !important;
+  border-radius: 8px;
+  padding: 12px 28px;
+  text-decoration: none;
+}
+
+.login-button:hover {
+  background-color: #ff5927 !important;
+  color: #fff !important;
 }
 
 .hamburger {
@@ -95,22 +112,25 @@
     background: #fff;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     border-radius: 8px;
-    padding: 16px 24px;
+    padding: 24px 24px;
     z-index: 100;
     flex-direction: column;
+    margin-top: 20px;
   }
 
   .navbar-right.open {
     display: flex;
+    padding: 24px 24px;
   }
 
   .nav-links {
     flex-direction: column;
-    gap: 20px;
+    gap: 40px;
+    text-align: center;
   }
 
   .nav-links li {
-    margin: 0;
+    margin: 20px;
   }
 
   .hamburger {

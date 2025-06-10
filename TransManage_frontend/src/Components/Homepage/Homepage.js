@@ -3,7 +3,6 @@ import image from './homeimage.jpg';
 
 function Homepage() {
   return (
-    <div className="container">
       <div className="homepage">
         <div className="homepage-content">
           <h1>Your one-stop solution for all translation management needs.</h1>
@@ -13,7 +12,6 @@ function Homepage() {
         </div>
         <img src={image} alt="TransManage" />
       </div>
-    </div>
   );
 }
 
