@@ -86,7 +86,7 @@
   margin-right: 0;
 }
 
-.login-button {
+.home-login-button {
   background-color: #ff705b;
   color: #fff !important;
   border-radius: 8px;
@@ -94,7 +94,7 @@
   text-decoration: none;
 }
 
-.login-button:hover {
+.home-login-button:hover {
   background-color: #ff5927 !important;
   color: #fff !important;
 }
