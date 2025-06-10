@@ -3,6 +3,7 @@ import './Navbar.css';
 import logo from './transmanage.jpg';
 
 const Navbar = () => {
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -10,7 +11,12 @@ const Navbar = () => {
       <nav className="navbar">
         <div className="navbar-left">
           <a href="/" className="brand">
-            <img src={logo} alt="TransManage Logo" className="logo" />
+            <img
+              src={logo}
+              alt="TransManage Logo"
+              className={`logo ${logoLoaded ? 'loaded' : ''}`}
+              onLoad={() => setLogoLoaded(true)}
+            />
             <span className="brandname"> TransManage </span>
           </a>
         </div>
@@ -25,15 +31,9 @@ const Navbar = () => {
         </button>
         <div className={`navbar-right${menuOpen ? ' open' : ''}`}>
           <ul className="nav-links">
-            <li>
-              <a href="/about">About Us</a>
-            </li>
-            <li>
-              <a href="/contact">Contact</a>
-            </li>
-            <li>
-              <a href="/login" className="login-button">Log In</a>
-            </li>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/login" className="login-button">Log In</a></li>
           </ul>
         </div>
       </nav>

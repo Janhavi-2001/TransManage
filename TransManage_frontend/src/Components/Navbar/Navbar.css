@@ -13,6 +13,18 @@
   background-color: white;
   color: #22223b;
   padding: 0.5rem;
+  animation: fadeInNavbar 0.8s ease-out;
+}
+
+@keyframes fadeInNavbar {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .navbar-left .brand {
@@ -27,6 +39,11 @@
   width: 100px;
   height: auto;
   display: block;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+.logo.loaded {
+  opacity: 1;
 }
 
 .brandname {
