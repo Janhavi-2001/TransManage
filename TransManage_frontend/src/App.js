@@ -5,6 +5,8 @@ import Loader from './Components/Loader/Loader';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
+import Dashboard from './Components/Dashboard/Dashboard';
+import Footer from './Components/Footer/Footer';
 import { useLocation } from 'react-router-dom';
 import './App.css';
 
@@ -29,8 +31,10 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/" element={<Homepage />} />
         </Routes>
+        {!hideNavbar && <Footer />}
       </>
     );
   };
