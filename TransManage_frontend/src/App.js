@@ -22,22 +22,25 @@ function App() {
   }, []);
 
   const AppContent = () => {
-    const location = useLocation();
-    const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
+  const footerHidden = ['/login', '/register', '/dashboard'].includes(location.pathname);
 
   return (
-      <>
-        {!hideNavbar && <Navbar />}
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/" element={<Homepage />} />
-        </Routes>
-        {!hideNavbar && <Footer />}
-      </>
-    );
-  };
+    <>
+      {!hideNavbar && <Navbar />}
+
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Homepage />} />
+      </Routes>
+
+      {!footerHidden && <Footer />}
+    </>
+  );
+};
 
   return (
     <div className="App">

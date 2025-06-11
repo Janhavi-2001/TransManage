@@ -1,0 +1,11 @@
+.topbar {
+  padding: 1rem;
+  background-color: #22223B;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.topbar span {
+  font-weight: bold;
+  color: white;
+}
