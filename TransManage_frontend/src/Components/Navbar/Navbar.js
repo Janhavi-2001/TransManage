@@ -7,7 +7,6 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="container">
       <nav className="navbar">
         <div className="navbar-left">
           <a href="/" className="brand">
@@ -37,7 +36,6 @@ const Navbar = () => {
           </ul>
         </div>
       </nav>
-    </div>
   );
 };
 

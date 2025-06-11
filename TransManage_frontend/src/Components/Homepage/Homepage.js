@@ -6,7 +6,6 @@ function Homepage() {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <div className="container">
       <div className="homepage">
         <div className="homepage-content">
           <h1>Your one-stop solution for all translation management needs.</h1>
@@ -21,7 +20,6 @@ function Homepage() {
           onLoad={() => setImgLoaded(true)}
         />
       </div>
-    </div>
   );
 }
 
