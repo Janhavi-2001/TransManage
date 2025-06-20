@@ -6,6 +6,7 @@
     width: 100%;
     min-height: 80vh;
     padding: 35px;
+    padding-bottom: 60px;
     box-sizing: border-box;
     background-color: aliceblue;
     gap: 50px;
