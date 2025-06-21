@@ -28,10 +28,10 @@ const Sidebar = () => {
       </button>
       <nav style={{ display: collapsed ? '' : 'flex' }}>
         <Link to="/dashboard"><span className="sidebar-item"><SolutionOutlined />&nbsp;&nbsp;Dashboard</span></Link>
-      <Link to="/translations"><span className="sidebar-item"><TranslationOutlined />&nbsp;&nbsp;Translations</span></Link>
-      <Link to="/projects"><span className="sidebar-item"><ProjectOutlined />&nbsp;&nbsp;Projects</span></Link>
-      <Link to="/settings"><span className="sidebar-item"><SettingOutlined />&nbsp;&nbsp;Settings</span></Link>
-      <Link to="/logout"><span className="sidebar-item"><PoweroffOutlined />&nbsp;&nbsp;Logout</span></Link>
+        <Link to="/projects"><span className="sidebar-item"><ProjectOutlined />&nbsp;&nbsp;Projects</span></Link>
+        <Link to="/translations"><span className="sidebar-item"><TranslationOutlined />&nbsp;&nbsp;Translations</span></Link>
+        <Link to="/settings"><span className="sidebar-item"><SettingOutlined />&nbsp;&nbsp;Settings</span></Link>
+        <Link to="/logout"><span className="sidebar-item"><PoweroffOutlined />&nbsp;&nbsp;Logout</span></Link>
       </nav>
     </div>
   );

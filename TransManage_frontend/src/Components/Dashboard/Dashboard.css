@@ -1,28 +1,17 @@
 .dashboard-container {
   display: flex;
-  height: 100vh;
-  flex: 1;
-}
-
-.sidebar {
-  width: 220px;
-  background-color: #22223B;
-  color: white;
-  padding: 1rem;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #f0f2f5;
 }
 
 .main-content {
-  flex: 1;
-  padding: 1rem;
-  background: #f5f6fa;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.topbar {
-  padding: 1rem;
-  background-color: #22223B;
-  border-bottom: 1px solid #ddd;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .dashboard-widgets {
