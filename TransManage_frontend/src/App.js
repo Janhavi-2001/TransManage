@@ -7,6 +7,7 @@ import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
 import Dashboard from './Components/Dashboard/Dashboard';
 import Footer from './Components/Footer/Footer';
+import Projects from './Components/Dashboard/Projects/Projects';
 import { useLocation } from 'react-router-dom';
 import './App.css';
 
@@ -24,7 +25,7 @@ function App() {
   const AppContent = () => {
   const location = useLocation();
   const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
-  const footerHidden = ['/login', '/register', '/dashboard'].includes(location.pathname);
+  const footerHidden = ['/login', '/register', '/dashboard', '/projects'].includes(location.pathname);
 
   return (
     <>
@@ -34,6 +35,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/projects" element={<Projects />} />
         <Route path="/" element={<Homepage />} />
       </Routes>
 

@@ -1,0 +1,178 @@
+import Sidebar from '../Sidebar/Sidebar';
+import '../Sidebar/Sidebar.css';
+import './Projects.css';
+import { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, Input} from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { getProjects, createProject, updateProject, deleteProject } from '../../../api/projectsApi';
+import languageToCountryCode from '../../../Data/languageToCountryCode';
+import ReactCountryFlag from 'react-country-flag';
+
+
+const Projects = () => {
+
+    const [projects, setProjects] = useState([]);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [editingProject, setEditingProject] = useState(null);
+    const [form] = Form.useForm();
+
+    const flagStyle = { width: '1.3em', height: '1.3em', marginRight: '0.4em', verticalAlign: 'middle' };
+
+    useEffect(() => {
+    const getAllProjects = async () => {
+        try {
+            const response = await getProjects();
+            if (Array.isArray(response)) {
+                setProjects(response);
+            } else {
+                console.error('Expected array but got:', response);
+                setProjects([]);
+            }
+            } catch (error) {
+                console.error('Failed to fetch projects:', error);
+                setProjects([]);
+            }
+        };
+        getAllProjects();
+    }, []);
+
+
+    const createProject = () => {
+        setEditingProject(null);
+        form.resetFields();
+        setIsModalVisible(true);
+    }
+
+    const updateProject = (project) => {
+        setEditingProject(project);
+        form.setFieldsValue({
+            name: project.name,
+            description: project.description,
+        });
+        setIsModalVisible(true);
+    }
+
+    const handleSubmit = async (values) => {
+        try {
+            if (editingProject) {
+                await updateProject(editingProject.id, values);
+                setProjects(projects.map(p => p.id === editingProject.id ? { ...p, ...values } : p));
+            } else {
+                const newProject = await createProject(values);
+                setProjects([...projects, newProject]);
+            }
+            setIsModalVisible(false);
+        } catch (error) {
+            console.error('Failed to save project:', error);
+        }
+    }
+
+    const deleteProject = async (id) => {
+        try {
+            await deleteProject(id);
+            setProjects(projects.filter(p => p.id !== id));
+        } catch (error) {
+            console.error('Failed to delete project:', error);
+        }
+    }
+
+    return (
+        <>
+        <div className="projects-container">
+            <Sidebar />
+            <div className="projects-content">
+                <h1>Your Translation Projects</h1>
+                <Button className="create-button" type="primary" icon={<PlusOutlined />} onClick={createProject}>
+                    Add Project
+                </Button>
+                <Table
+                    className="projects-table"
+                    pagination={{ pageSize: 10 }}
+                    dataSource={projects}
+                    scroll={{ x: 'max-content' }}
+                    rowKey="id"
+                    columns={[
+                        { title: 'Name', dataIndex: 'name', key: 'name', render: (text) => (
+                            <span className="project-name">{text}</span>
+                            ) },
+                            { title: 'Description', dataIndex: 'description', key: 'description' , render: (text) => (
+                                <span className="project-description">{text}</span>
+                            ) },
+                            { title: 'Base Language', dataIndex: 'baseLanguage', key: 'baseLanguage', render: (lang) => {
+                                const code = languageToCountryCode[lang];
+                                return (
+                                <span className="language-badge">
+                                    {code && <ReactCountryFlag countryCode={code} svg style={flagStyle} />}
+                                    {lang}
+                                </span>
+                                );
+                            }},
+                            { title: 'Target Languages', dataIndex: 'targetLanguages', key: 'targetLanguages', render: (text) =>
+                                text
+                                ? text.split(',').map((lang) => {
+                                    const trimmed = lang.trim();
+                                    const code = languageToCountryCode[trimmed];
+                                    return (
+                                        <span key={trimmed} className="language-badge">
+                                        {code && <ReactCountryFlag countryCode={code} svg style={flagStyle} />}
+                                        {trimmed}
+                                        </span>
+                                    );
+                                    })
+                                : null,
+                            },
+                            { title: 'Created At', dataIndex: 'createdAt', key: 'createdAt', render: (text) => {
+                                console.log('CreatedAt raw value:', text);
+                                return new Date(text).toLocaleString();
+                            }},
+                            { title: 'Updated At', dataIndex: 'updatedAt', key: 'updatedAt', render: (text) => {
+                                console.log('UpdatedAt raw value:', text);
+                                return new Date(text).toLocaleString();
+                            }},
+                            { title: 'Status', dataIndex: 'status', key: 'status', render: (text) => (
+                                <span className={`status-${text.toLowerCase()}`}>
+                                    {text}
+                                </span>
+                            ) },
+                            { title: 'Actions', key: 'actions', render: (_, record) => (
+                            <>
+                                <Button className="view-button" icon={<EyeOutlined />}/>
+                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => updateProject(record)} />
+                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => deleteProject(record.id)} />
+                            </>
+                        ) },
+                    ]}
+                />
+                <Modal
+                    title={editingProject ? 'Edit Project' : 'Add Project'}
+                    open={isModalVisible}
+                    onCancel={() => setIsModalVisible(false)}
+                    footer={null}
+                >
+                    <Form form={form} onFinish={handleSubmit}>
+                        <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please enter project name' }]}>
+                            <Input />
+                        </Form.Item>
+                        <Form.Item name="description" label="Description">
+                            <Input.TextArea />
+                        </Form.Item>
+                        <Form.Item name="baseLanguage" label="Base Language" rules={[{ required: true, message: 'Please select base language' }]}>
+                            <Input />
+                        </Form.Item>
+                        <Form.Item name="targetLanguages" label="Target Languages" rules={[{ required: true, message: 'Please select target languages' }]}>
+                            <Input />
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit">
+                                {editingProject ? 'Update Project' : 'Create Project'}
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+            </div>
+        </div>
+        </>
+    );
+}
+
+export default Projects;
