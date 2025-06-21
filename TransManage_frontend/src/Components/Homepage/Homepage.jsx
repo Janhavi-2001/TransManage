@@ -1,5 +1,5 @@
 import './Homepage.css';
-import image from './homeimage.jpg';
+import homeImage from '../../assets/images/homeimage.png';
 import { useState } from 'react';
 
 function Homepage() {
@@ -14,7 +14,7 @@ function Homepage() {
           <a href="/" className="demo-link">View Demo</a>
         </div>
         <img
-          src={image}
+          src={homeImage}
           alt="TransManage"
           className={imgLoaded ? 'loaded' : ''}
           onLoad={() => setImgLoaded(true)}
