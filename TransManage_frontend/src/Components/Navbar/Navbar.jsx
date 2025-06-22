@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Navbar.css';
-import logo from './transmanage.jpg';
+import logo from '../../assets/images/transmanage.jpg';
 
 const Navbar = () => {
   const [logoLoaded, setLogoLoaded] = useState(false);
