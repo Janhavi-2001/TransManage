@@ -2,7 +2,7 @@ import Sidebar from '../Sidebar/Sidebar';
 import '../Sidebar/Sidebar.css';
 import './Projects.css';
 import { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input} from 'antd';
+import { Table, Button, Modal, Form, Input, Select, Tag} from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { getProjects, createProject, updateProject, deleteProject } from '../../../api/projectsApi';
 import languageToCountryCode from '../../../Data/languageToCountryCode';
@@ -36,6 +36,9 @@ const Projects = () => {
         getAllProjects();
     }, []);
 
+    const viewProject = (id) => {
+        window.location.href = `/projects/${id}/pages`;
+    }
 
     const createProject = () => {
         setEditingProject(null);
@@ -129,14 +132,20 @@ const Projects = () => {
                                 console.log('UpdatedAt raw value:', text);
                                 return new Date(text).toLocaleString();
                             }},
-                            { title: 'Status', dataIndex: 'status', key: 'status', render: (text) => (
-                                <span className={`status-${text.toLowerCase()}`}>
-                                    {text}
-                                </span>
-                            ) },
+                            { title: 'Status', dataIndex: 'status', key: 'status', render: (text = '') => {
+                                const colorMap = {
+                                    active: 'green',
+                                    pending: 'red',
+                                    completed: 'blue',
+                                };
+
+                                const color = colorMap[text.toLowerCase()] || 'default';
+
+                                return <Tag color={color}>{text}</Tag>;
+                            }},
                             { title: 'Actions', key: 'actions', render: (_, record) => (
                             <>
-                                <Button className="view-button" icon={<EyeOutlined />}/>
+                                <Button className="view-button" icon={<EyeOutlined />} onClick={() => viewProject(`${record.id}/pages`)} />
                                 <Button className="edit-button" icon={<EditOutlined />} onClick={() => updateProject(record)} />
                                 <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => deleteProject(record.id)} />
                             </>
@@ -149,21 +158,41 @@ const Projects = () => {
                     onCancel={() => setIsModalVisible(false)}
                     footer={null}
                 >
-                    <Form form={form} onFinish={handleSubmit}>
-                        <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please enter project name' }]}>
+                    <br />
+                    <Form form={form} labelCol={{ span: 7 }} wrapperCol={{ span: 18 }} layout="horizontal" onFinish={handleSubmit}>
+                        <Form.Item name="name" label="Name" className="form-input" rules={[{ required: true, message: 'Please enter project name' }]}>
                             <Input />
                         </Form.Item>
-                        <Form.Item name="description" label="Description">
+                        <Form.Item name="description" label="Description" className="form-input">
                             <Input.TextArea />
                         </Form.Item>
-                        <Form.Item name="baseLanguage" label="Base Language" rules={[{ required: true, message: 'Please select base language' }]}>
-                            <Input />
+                        <Form.Item name="baseLanguage" label="Base Language" className="form-input" rules={[{ required: true, message: 'Please select base language' }]}>
+                            <Select mode="single" placeholder="Select base language">
+                                {Object.keys(languageToCountryCode).map(text => (
+                                    <Select.Option key={text} value={text}>
+                                        <ReactCountryFlag countryCode={languageToCountryCode[text]} svg style={flagStyle} />
+                                        {text}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </Form.Item>
-                        <Form.Item name="targetLanguages" label="Target Languages" rules={[{ required: true, message: 'Please select target languages' }]}>
-                            <Input />
+                        <Form.Item
+                            name="targetLanguages"
+                            label="Target Languages"
+                            className="form-input"
+                            rules={[{ required: true, message: 'Please select target languages' }]}
+                            >
+                            <Select mode="multiple" placeholder="Select target languages">
+                                {Object.keys(languageToCountryCode).map(text => (
+                                    <Select.Option key={text} value={text}>
+                                        <ReactCountryFlag countryCode={languageToCountryCode[text]} svg style={flagStyle} />
+                                        {text}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </Form.Item>
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit">
+                        <Form.Item style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                            <Button type="primary" htmlType="submit" className='form-submit-button'>
                                 {editingProject ? 'Update Project' : 'Create Project'}
                             </Button>
                         </Form.Item>
