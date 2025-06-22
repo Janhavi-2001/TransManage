@@ -37,7 +37,7 @@ const Projects = () => {
     }, []);
 
     const viewProject = (id) => {
-        window.location.href = `/projects/${id}/pages`;
+        window.location.href = `/projects/${id}`;
     }
 
     const createProject = () => {
