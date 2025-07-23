@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 public class Page {
     private long id;
     private String name;
+    private String description;
+    private String content;     // Assuming content is a String, can be changed to another type if needed
     private long projectId;
     private String status;
     private String language;
@@ -15,9 +17,12 @@ public class Page {
     public Page() {}
 
     // Parameterized constructor
-    public Page(long id, String name, long projectId, LocalDateTime createdAt, LocalDateTime updatedAt, String status, String language) {
+    public Page(long id, String name, String description, String content, long projectId, LocalDateTime createdAt, LocalDateTime updatedAt, String status, String language) 
+    {
         this.id = id;
         this.name = name;
+        this.description = description;
+        this.content = content;
         this.projectId = projectId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -37,6 +42,18 @@ public class Page {
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public String getContent() {
+        return content;
+    }
+    public void setContent(String content) {
+        this.content = content;
     }
     public long getProjectId() {
         return projectId;

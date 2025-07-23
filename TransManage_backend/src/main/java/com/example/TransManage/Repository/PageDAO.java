@@ -2,6 +2,7 @@ package com.example.TransManage.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.example.TransManage.Model.Page;
 import com.example.TransManage.Service.Pages;
@@ -13,27 +14,34 @@ public class PageDAO {
 
     static {
         // Initialize with some dummy data
-        pages.getPages().add(new Page(1, "Home", 1, LocalDateTime.now(), LocalDateTime.now(), "active", "en"));
-        pages.getPages().add(new Page(2, "About", 1, LocalDateTime.now(), LocalDateTime.now(), "active", "en"));
-        pages.getPages().add(new Page(3, "Contact", 1, LocalDateTime.now(), LocalDateTime.now(), "inactive", "en"));
-        pages.getPages().add(new Page(4, "Services", 2, LocalDateTime.now(), LocalDateTime.now(), "active", "fr"));
-        pages.getPages().add(new Page(5, "Portfolio", 2, LocalDateTime.now(), LocalDateTime.now(), "inactive", "fr"));
+        // Constructor: (id, name, title, description, content, projectId, createdAt, updatedAt, status, language)
+        pages.getPages().add(new Page(1, "Home Page", "Main landing page", "Welcome to our website. This is the home page content.", 1, LocalDateTime.now(), LocalDateTime.now(), "Active", "en"));
+        pages.getPages().add(new Page(2, "About Us", "Information about the company", "Learn more about our company, mission, and values.", 1, LocalDateTime.now(), LocalDateTime.now(), "Active", "en"));
+        pages.getPages().add(new Page(3, "Contact Us", "Contact information and form", "Get in touch with us using the contact form below.", 1, LocalDateTime.now(), LocalDateTime.now(), "Pending", "en"));
+        pages.getPages().add(new Page(4, "Our Services", "List of services offered", "We offer a wide range of professional services.", 2, LocalDateTime.now(), LocalDateTime.now(), "Active", "en"));
     }
 
     // Method to get all pages
-    public List<Page> getAllPages() {
-        return pages.getPages();
+    public List<Page> getPagesByProjectId(Long projectId) {
+    return pages.getPages().stream()
+            .filter(page -> page.getProjectId() == projectId)
+            .collect(Collectors.toList());
     }
 
-    // Method to find a page by ID
+    // Method to create a new page
     public void createPage(Page page) {
+        // Set auto-generated ID and timestamps
+        page.setId(pages.getPages().size() + 1);
+        page.setCreatedAt(LocalDateTime.now());
+        page.setUpdatedAt(LocalDateTime.now());
         pages.getPages().add(page);
     }
 
-    // Method to find a page by ID
+    // Method to update an existing page
     public boolean updatePage(Page updatedPage) {
         for (int i = 0; i < pages.getPages().size(); i++) {
             if (pages.getPages().get(i).getId() == updatedPage.getId()) {
+                updatedPage.setUpdatedAt(LocalDateTime.now());
                 pages.getPages().set(i, updatedPage);
                 return true;
             }

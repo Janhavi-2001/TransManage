@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/pages")
+@RequestMapping("/api/projects/{projectId}/pages")
 @CrossOrigin(origins = "http://localhost:3000")
 
 public class PageController {
@@ -27,27 +27,29 @@ public class PageController {
 
     // Method to get all projects
     @GetMapping
-    public List<Page> getAllPages() {
-        return pageDAO.getAllPages();
+    public List<Page> getAllPages(@PathVariable Long projectId) {
+        return pageDAO.getPagesByProjectId(projectId);
     }
 
     // Method to create a new page
     @PostMapping
-    public void createPage(@RequestBody Page page) {
+    public Page createPage(@PathVariable Long projectId, @RequestBody Page page) {
+        page.setProjectId(projectId);
         pageDAO.createPage(page);
+        return page;
     }
 
     // Method to update an existing page
-    @PutMapping("/{id}")
-    public boolean updatePage(@PathVariable Long id, @RequestBody Page page) {
-        page.setId(id);
+    @PutMapping("/{pageId}")
+    public boolean updatePage(@PathVariable Long pageId, @RequestBody Page page) {
+        page.setId(pageId);
         return pageDAO.updatePage(page);
     }
 
     // Method to delete a page by ID
-    @DeleteMapping("/{id}")
-    public boolean deletePage(@PathVariable Long id) {
-        return pageDAO.removePageById(id);
+    @DeleteMapping("/{pageId}")
+    public boolean deletePage(@PathVariable Long pageId) {
+        return pageDAO.removePageById(pageId);
     }
 
 }
