@@ -4,6 +4,7 @@ import Navbar from './Components/Navbar/Navbar';
 import Loader from './Components/Loader/Loader';
 import Login from './Components/Login/Login';
 import Register from './Components/Register/Register';
+import Contact from './Components/Contact/Contact';
 import Dashboard from './Components/Dashboard/Dashboard';
 import Footer from './Components/Footer/Footer';
 import Projects from './Components/Dashboard/Projects/Projects';
@@ -38,6 +39,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id/pages" element={<Pages />} />

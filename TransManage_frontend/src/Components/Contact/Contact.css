@@ -1,0 +1,253 @@
+.contact-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px;
+    min-height: 100vh;
+    gap: 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.contact-image {
+    margin-bottom: 30px;
+}
+
+.contact-image img {
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.contact-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.contact-card {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-card h3 {
+    color: #ff705b;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.contact-card p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.contact-card a {
+    color: #333;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.contact-card a:hover {
+    color: #ff705b;
+    text-decoration: underline;
+}
+
+.contact-card span {
+    color: #333;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.contact-right {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+}
+
+.contact-form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 100%;
+}
+
+.contact-form-section h1 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.contact-form-section p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 32px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.contact-form .ant-form-item {
+    margin-bottom: 20px;
+}
+
+.contact-form .ant-input,
+.contact-form .ant-input-password {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+}
+
+.contact-form .ant-input:focus,
+.contact-form .ant-input-password:focus {
+    border-color: #ff705b;
+    box-shadow: 0 0 0 2px rgba(255, 112, 91, 0.2);
+}
+
+.submit-button {
+    width: 100%;
+    background-color: #ff705b !important;
+    border-color: #ff705b !important;
+    color: #fff !important;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    height: auto;
+}
+
+.submit-button:hover {
+    background-color: #e05a4f !important;
+    border-color: #e05a4f !important;
+    box-shadow: 0 4px 12px rgba(255, 112, 91, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .contact-content {
+        flex-direction: column;
+        padding: 20px;
+        gap: 30px;
+        align-items: center;
+    }
+    
+    .contact-left {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .contact-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        width: 100%;
+        max-width: 350px;
+    }
+    
+    .contact-card {
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .contact-card h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .contact-card p {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    .contact-card a,
+    .contact-card span {
+        font-size: 14px;
+    }
+    
+    .contact-right {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .contact-form-section {
+        padding: 24px;
+        border-radius: 12px;
+    }
+    
+    .contact-form-section h1 {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+    
+    .contact-form-section p {
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+    
+    .contact-image img {
+        width: 300px;
+        height: 300px;
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-content {
+        padding: 16px;
+        gap: 24px;
+    }
+    
+    .contact-cards {
+        max-width: 300px;
+        gap: 12px;
+    }
+    
+    .contact-card {
+        padding: 16px;
+    }
+    
+    .contact-card h3 {
+        font-size: 15px;
+    }
+    
+    .contact-card p {
+        font-size: 12px;
+    }
+    
+    .contact-card a,
+    .contact-card span {
+        font-size: 13px;
+    }
+    
+    .contact-form-section {
+        padding: 20px;
+    }
+    
+    .contact-form-section h1 {
+        font-size: 24px;
+    }
+    
+    .contact-image img {
+        width: 250px;
+        height: 250px;
+    }
+}

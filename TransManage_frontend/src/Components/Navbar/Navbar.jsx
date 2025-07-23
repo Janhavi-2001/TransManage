@@ -30,9 +30,8 @@ const Navbar = () => {
         </button>
         <div className={`navbar-right${menuOpen ? ' open' : ''}`}>
           <ul className="nav-links">
-            <li><a href="/about">About Us</a></li>
             <li><a href="/projects">Projects</a></li>
-            <li><a href="/contact">Contact</a></li>
+            <li><a href="/contact">Contact Us</a></li>
             <li><a href="/login" className="home-login-button">Log In</a></li>
           </ul>
         </div>
