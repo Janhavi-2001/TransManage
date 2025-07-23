@@ -1,13 +1,14 @@
 import {React, useState, useEffect} from 'react';
-import { Button, Modal, Form, Input } from 'antd';
+import { Button, Modal, Form, Input, Table, Tag} from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { getPages, createPage, updatePage, deletePage } from '../../../../api/pagesApi';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './Pages.css';
 import Sidebar from '../../Sidebar/Sidebar';
 
 const Pages = () => {
 
+    const navigate = useNavigate();
     const [pages, setPages] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingPage, setEditingPage] = useState(null);
@@ -23,31 +24,46 @@ const Pages = () => {
         fetchPages();
     }, [id]);
 
-    const viewPage = (id) => {
-        window.location.href = `/projects/${id}/pages`;
-    }
+    const handleViewPage = (pageId) => {
+        navigate(`/projects/${id}/pages/${pageId}`);
+    };
 
-    const createPage = () => {
+
+    const handleCreatePage = () => {
         setEditingPage(null);
         form.resetFields();
         setIsModalVisible(true);
     }
-    const updatePage = (page) => {
+    const handleUpdatePage = (page) => {
         setEditingPage(page);
         form.setFieldsValue({
-            title: page.title,
+            name: page.name,
+            description: page.description,
             content: page.content,
         });
         setIsModalVisible(true);
     }
-    const deletePage = async (pageId) => {
+    const handleDeletePage = async (pageId) => {
         await deletePage(pageId);
         setPages(pages.filter(page => page.id !== pageId));
     }
     const handleSubmit = async (values) => {
         if (editingPage) {
             await updatePage(editingPage.id, values);
-            setPages(pages.map(page => page.id === editingPage.id ? { ...page, ...values } : page));
+            const response = await getPages(id);
+            console.log('Updated pages response:', response);
+            if (response && response.pages) {
+                if (Array.isArray(response.pages)) {
+                    setPages(response.pages);
+                } else if (typeof response.pages === 'object') {
+                    setPages(Object.values(response.pages));
+                } else {
+                    console.error('Unexpected pages format:', response.pages);
+                    setPages([]);
+                }
+                } else {
+                setPages([]);
+                }
         } else {
             const newPage = await createPage(id, values);
             setPages([...pages, newPage]);
@@ -57,50 +73,106 @@ const Pages = () => {
     }
     
     return (
-        <div className="page-cards-container">
+        <div className="pages-container">
         <Sidebar />
-        <div className="page-content">
-        <h1 className="page-title">Pages</h1>
-        <Button type="primary" icon={<PlusOutlined />} onClick={createPage} className="create-page-button">
-            Create Page
-        </Button>
-        {pages.map(page => (
-            <div className="page-card" key={page.id}>
-            <h3>{page.title}</h3>
-            <div className="card-actions">
-                <Button icon={<EyeOutlined />} onClick={() => viewPage(page.id)} />
-                <Button icon={<EditOutlined />} onClick={() => updatePage(page)} />
-                <Button icon={<DeleteOutlined />} onClick={() => deletePage(page.id)} />
-            </div>
-            </div>
-        ))}
+            <div className="pages-content">
+            <h1><a href = "/projects">Projects</a> {'>'} Project {id} {'>'} Pages</h1>
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleCreatePage} className="create-page-button"> Add Page </Button>
+            
+            <Table
+                className="pages-table"
+                pagination={{ pageSize: 10 }}
+                dataSource={pages}
+                scroll={{ x: 'max-content' }}
+                rowKey="id"
+                columns={[
+                    { 
+                        title: 'Name', 
+                        dataIndex: 'name', 
+                        key: 'name', 
+                        render: (text, record) => (
+                            <span className="page-name">{text || record.name || 'No Name'}</span>
+                        ) 
+                    },
+                    {
+                        title: 'Description',
+                        dataIndex: 'description',
+                        key: 'description',
+                        width: 180,
+                        render: (text) => text || 'No Description'
+                    },
+                    {
+                        title: 'Content',
+                        dataIndex: 'content',
+                        key: 'content',
+                        render: (text) => text || 'No Content'
+                    },
+                    {
+                        title: 'Created At',
+                        dataIndex: 'createdAt',
+                        key: 'createdAt',
+                        render: (text) => text ? new Date(text).toLocaleString() : 'N/A'
+                    },
+                    { 
+                        title: 'Updated At', 
+                        dataIndex: 'updatedAt', 
+                        key: 'updatedAt', 
+                        render: (text) => text ? new Date(text).toLocaleString() : 'N/A'
+                    },
+                    { 
+                        title: 'Status', 
+                        dataIndex: 'status', 
+                        key: 'status', 
+                        render: (text) => {
+                            const colorMap = {
+                                active: 'green',
+                                pending: 'red',
+                                completed: 'blue',
+                            };
+                            const color = colorMap[text.toLowerCase()] || 'default';
+                            return <Tag color={color}>{text}</Tag>;
+                        }
+                    },
+                    { title: 'Actions', key: 'actions', render: (_, record) => (
+                            <>
+                                <Button className="view-button" icon={<EyeOutlined />} onClick={() => handleViewPage(`${record.id}/pages`)} />
+                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdatePage(record)} />
+                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => handleDeletePage(record.id)} />
+                            </>
+                    ) },
+                ]}
+            />
 
-
-        <Modal
-            title={editingPage ? 'Edit Page' : 'Create Page'}
-            open={isModalVisible}
-            onCancel={() => setIsModalVisible(false)}
-            footer={null}
-            >
-            <Form
-                form={form}
-                onFinish={handleSubmit}
-                initialValues={editingPage ? { title: editingPage.title, content: editingPage.content } : {}}
+            <Modal
+                title={editingPage ? 'Edit Page' : 'Create Page'}
+                open={isModalVisible}
+                onCancel={() => setIsModalVisible(false)}
+                footer={null}
                 >
-                <Form.Item name="title" label="Title" rules={[{ required: true, message: 'Please enter page title' }]}>
-                    <Input />
-                </Form.Item>
-                <Form.Item name="content" label="Content" rules={[{ required: true, message: 'Please enter page content' }]}>
-                    <Input.TextArea rows={4} />
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit">
-                        {editingPage ? 'Update Page' : 'Create Page'}
-                    </Button>
-                </Form.Item>
-            </Form>
-            </Modal>
-        </div>
+                <Form
+                    labelCol={{ span: 7 }} wrapperCol={{ span: 18 }}
+                    layout="horizontal" 
+                    form={form}
+                    onFinish={handleSubmit}
+                    initialValues={editingPage ? { name: editingPage.name, description: editingPage.description, content: editingPage.content } : {}}
+                    >
+                    <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please enter page name' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="description" label="Description" rules={[{ required: true, message: 'Please enter page description' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="content" label="Content" rules={[{ required: true, message: 'Please enter page content' }]}>
+                        <Input.TextArea rows={4} />
+                    </Form.Item>
+                    <Form.Item style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <Button type="primary" htmlType="submit">
+                            {editingPage ? 'Update Page' : 'Create Page'}
+                        </Button>
+                    </Form.Item>
+                </Form>
+                </Modal>
+            </div>
         </div>
     );
 };
