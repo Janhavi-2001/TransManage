@@ -47,6 +47,19 @@ const TranslationKeys = () => {
         }
     }, [projectId, pageId]);
 
+    useEffect(() => {
+        if (editingTranslationKey && isModalVisible) {
+            form.setFieldsValue({
+                keyName: editingTranslationKey.keyName,
+                sourceText: editingTranslationKey.sourceText,
+                description: editingTranslationKey.description,
+                keyType: editingTranslationKey.keyType,
+                isRequired: editingTranslationKey.isRequired,
+                characterLimit: editingTranslationKey.characterLimit
+            });
+        }
+    }, [editingTranslationKey, isModalVisible, form]);
+
     const handleViewTranslationKey = (keyId) => {
         navigate(`/projects/${projectId}/pages/${pageId}/translation-keys/${keyId}`);
     };
@@ -58,7 +71,7 @@ const TranslationKeys = () => {
     };
 
     const handleUpdateTranslationKey = (key) => {
-    setEditingTranslationKey(key);
+        setEditingTranslationKey(key);
         form.setFieldsValue({
             keyName: key.keyName,
             sourceText: key.sourceText,
@@ -198,7 +211,9 @@ const TranslationKeys = () => {
                             keyType: editingTranslationKey.keyType,
                             isRequired: editingTranslationKey.isRequired,
                             characterLimit: editingTranslationKey.characterLimit
-                        } : {}}
+                        } : {
+                            isRequired: true
+                        }}
                     >
                         <Form.Item name="keyName" label="Key Name" rules={[{ required: true, message: 'Please enter key name' }]}>
                             <Input placeholder="e.g., welcome_message, submit_button" />
@@ -222,7 +237,7 @@ const TranslationKeys = () => {
                             </Select>
                         </Form.Item>
                         
-                        <Form.Item name="isRequired" valuePropName="checked" style = {{ paddingLeft: '140px' }}>
+                        <Form.Item name="isRequired" valuePropName="checked" wrapperCol={{ offset: 7, span: 18 }}>
                             <Checkbox>This is a required translation</Checkbox>
                         </Form.Item>
                         
