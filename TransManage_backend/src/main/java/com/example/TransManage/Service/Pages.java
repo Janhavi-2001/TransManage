@@ -13,7 +13,7 @@ public class Pages {
     private List<Page> pageList;
 
     // Get the list of pages
-    public List<Page> getPages() {
+    public List<Page> getPageList() {
         if (pageList == null) {
             pageList = new ArrayList<>();
         }

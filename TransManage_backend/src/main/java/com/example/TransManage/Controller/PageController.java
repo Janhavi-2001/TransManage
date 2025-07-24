@@ -51,5 +51,4 @@ public class PageController {
     public boolean deletePage(@PathVariable Long pageId) {
         return pageDAO.removePageById(pageId);
     }
-
 }
