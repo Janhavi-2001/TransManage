@@ -1,0 +1,106 @@
+.translation-keys-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #f0f2f5;
+}
+.translation-keys-content {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.translation-keys-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.translation-keys-content h1 {
+  font-size: 24px;
+  color: #333;
+}
+.create-translation-key-button {
+  padding: 20px 20px;
+  font-size: 16px;
+  color: #fff !important;
+  background-color: #ff705b;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+}
+.create-translation-key-button:hover {
+  background-color: #e05a4f !important;
+}
+.view-button {
+  padding: 8px 15px;
+  font-size: 14px;
+  color: #fff !important;
+  background-color: #28a745;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.view-button:hover {
+  background-color: #218838 !important;
+  transition: background-color 0.3s ease;
+}
+.delete-button {
+  background-color: #dc3545;
+  padding: 8px 15px;
+  font-size: 14px;
+  color: #fff !important;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+}
+.delete-button:hover {
+  background-color: #c82333 !important;
+}
+.edit-button {
+  background-color: #ffc107;
+    padding: 8px 15px;
+    font-size: 14px;
+    color: #fff !important;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.edit-button:hover {
+  background-color: #e0a800 !important;
+}
+.projects-item .status {
+  font-size: 14px;
+}
+@media (max-width: 768px) {
+  .translation-keys-container {
+    flex-direction: column;
+  }
+  .translation-keys-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .translation-keys-content button {
+    width: 100%;
+    margin-left: 0;
+  }
+  .translation-keys-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .table {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .view-button,
+  .delete-button,
+  .edit-button {
+    margin: 10px;
+  }
+}

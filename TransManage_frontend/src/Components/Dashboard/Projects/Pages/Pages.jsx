@@ -25,7 +25,7 @@ const Pages = () => {
     }, [id]);
 
     const handleViewPage = (pageId) => {
-        navigate(`/projects/${id}/pages/${pageId}`);
+        navigate(`/projects/${id}/pages/${pageId}/translation-keys`);
     };
 
 
@@ -76,7 +76,15 @@ const Pages = () => {
         <div className="pages-container">
         <Sidebar />
             <div className="pages-content">
-            <h1><a href = "/projects">Projects</a> {'>'} Project {id} {'>'} Pages</h1>
+            <h1>
+                <span 
+                    onClick={() => navigate('/projects')} 
+                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
+                >
+                    Projects
+                </span>
+                {' > '} Project {id} {' > '} Pages
+            </h1>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleCreatePage} className="create-page-button"> Add Page </Button>
             
             <Table
@@ -135,8 +143,8 @@ const Pages = () => {
                     },
                     { title: 'Actions', key: 'actions', render: (_, record) => (
                             <>
-                                <Button className="view-button" icon={<EyeOutlined />} onClick={() => handleViewPage(`${record.id}/pages`)} />
-                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdatePage(record)} />
+                                <Button className="view-button" icon={<EyeOutlined />} onClick={() => handleViewPage(record.id)} />
+                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdatePage(record.id)} />
                                 <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => handleDeletePage(record.id)} />
                             </>
                     ) },
