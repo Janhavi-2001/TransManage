@@ -8,10 +8,27 @@ public class Translation {
     private String targetLanguage;   // "es", "fr", "de", etc.
     private String translatedText;   // Actual translation
     private String status;           // "pending", "translated", "reviewed", "approved"
-    private String translatorId;     // Who translated it
+    private long translatorId;       // Who translated it
     private String notes;            // Translator/reviewer notes
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Default constructor
+    public Translation() {}
+
+    // Parameterized constructor
+    public Translation(long id, long translationKeyId, String targetLanguage, String translatedText, 
+                       String status, long translatorId, String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.translationKeyId = translationKeyId;
+        this.targetLanguage = targetLanguage;
+        this.translatedText = translatedText;
+        this.status = status;
+        this.translatorId = translatorId;
+        this.notes = notes;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     // Getters and Setters
     public long getId() {
@@ -44,10 +61,10 @@ public class Translation {
     public void setStatus(String status) {
         this.status = status;
     }
-    public String getTranslatorId() {
+    public long getTranslatorId() {
         return translatorId;
     }
-    public void setTranslatorId(String translatorId) {
+    public void setTranslatorId(long translatorId) {
         this.translatorId = translatorId;
     }
     public String getNotes() {
