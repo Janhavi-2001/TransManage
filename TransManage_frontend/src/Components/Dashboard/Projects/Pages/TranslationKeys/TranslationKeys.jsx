@@ -61,7 +61,7 @@ const TranslationKeys = () => {
     }, [editingTranslationKey, isModalVisible, form]);
 
     const handleViewTranslationKey = (keyId) => {
-        navigate(`/projects/${projectId}/pages/${pageId}/translation-keys/${keyId}`);
+        navigate(`/projects/${projectId}/pages/${pageId}/translation-keys/${keyId}/translations`);
     };
 
     const handleCreateTranslationKey = () => {
@@ -161,11 +161,15 @@ const TranslationKeys = () => {
                         title: 'Source Text',
                         dataIndex: 'sourceText',
                         key: 'sourceText',
+                        width: 200,
+                        render: (text) => text ? text : 'No Source Text'
                     },
                     {
                         title: 'Description',
                         dataIndex: 'description',
                         key: 'description',
+                        width: 180,
+                        render: (text) => text ? text : 'No Description'
                     },
                     {
                         title: 'Created At',

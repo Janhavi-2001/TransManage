@@ -10,6 +10,7 @@ import Footer from './Components/Footer/Footer';
 import Projects from './Components/Dashboard/Projects/Projects';
 import Pages from './Components/Dashboard/Projects/Pages/Pages';
 import TranslationKeys from './Components/Dashboard/Projects/Pages/TranslationKeys/TranslationKeys';
+import Translations from './Components/Dashboard/Projects/Pages/TranslationKeys/Translations/Translations';
 import './App.css';
 
 import { useLocation } from 'react-router-dom';
@@ -32,7 +33,8 @@ function App() {
   const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
   const footerHidden = ['/login', '/register', '/dashboard', '/projects', '/projects/:id/pages', '/projects/:id/pages/:pageId/translation-keys'].includes(location.pathname) 
   || matchPath('/projects/:id/pages', location.pathname) !== null
-  || matchPath('/projects/:id/pages/:pageId/translation-keys', location.pathname) !== null;
+  || matchPath('/projects/:id/pages/:pageId/translation-keys', location.pathname) !== null
+  || matchPath('/projects/:id/pages/:pageId/translation-keys/:translation-key-id/translations', location.pathname) !== null;
 
   return (
     <>
@@ -46,6 +48,7 @@ function App() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id/pages" element={<Pages />} />
         <Route path="/projects/:id/pages/:pageId/translation-keys" element={<TranslationKeys />} />
+        <Route path="/projects/:id/pages/:pageId/translation-keys/:translationKeyId/translations" element={<Translations />} />
         <Route path="/" element={<Homepage />} />
       </Routes>
 
