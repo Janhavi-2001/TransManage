@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { SolutionOutlined, TranslationOutlined, ProjectOutlined } from '@ant-design/icons';
 import './Sidebar.css';
 import { useState, useEffect } from 'react';
 import { getProjects } from '../../../api/projectsApi';
 import { getPages } from '../../../api/pagesApi';
 import { getTranslationKeys } from '../../../api/translationkeysApi';
+import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(true);
@@ -17,6 +18,12 @@ const Sidebar = () => {
   const [pageKeys, setPageKeys] = useState({});
   const [loadingPages, setLoadingPages] = useState({});
   const [loadingKeys, setLoadingKeys] = useState({});
+  const location = useLocation();
+
+  // Function to check if a route is active
+  const isActiveRoute = (path) => {
+    return location.pathname === path;
+  };
 
   useEffect(() => {
     loadProjects();
@@ -116,40 +123,42 @@ const Sidebar = () => {
       
       <nav style={{ display: collapsed ? '' : 'flex' }}>
         <Link to="/dashboard">
-          <span className="sidebar-item"><SolutionOutlined />&nbsp;&nbsp;Overview</span>
+          <span className={`sidebar-item ${isActiveRoute('/dashboard') ? 'active' : ''}`}>
+            <SolutionOutlined />&nbsp;&nbsp;Overview
+          </span>
         </Link>
 
         {/* Projects */}
         <div>
           <div className="sidebar-item" onClick={toggleProjects}>
-            <ProjectOutlined />&nbsp;&nbsp;Projects {showProjects ? '⬆️' : '⬇️'}
+            <ProjectOutlined />&nbsp;&nbsp;Projects&nbsp; {showProjects ? <IoIosArrowUp /> : <IoIosArrowDown />}
             {loading && <span>&nbsp;⏳</span>}
           </div>
           {showProjects && (
             <div className="nested-menu">
-              <Link to="/projects">
-                <div className="sidebar-item nested">
-                  &nbsp;&nbsp;&nbsp;📋 All Projects
-                </div>
-              </Link>
               
               {projects.length === 0 && !loading ? (
                 <div className="sidebar-item nested">
                   &nbsp;&nbsp;&nbsp;No projects available
                 </div>
               ) : (
-                projects.map(project => (
-                  <div key={project.id}>
-                    <div className="sidebar-item nested" onClick={() => toggleProject(project.id)}>
-                      &nbsp;&nbsp;&nbsp;📁 {project.name} {expandedProjects.has(project.id) ? '⬆️' : '⬇️'}
-                      {loadingPages[project.id] && <span>&nbsp;⏳</span>}
+                <Link to="/projects">
+                  <div className={`sidebar-item nested ${isActiveRoute('/projects') ? 'active' : ''}`}>
+                    &nbsp;&nbsp;&nbsp;📋 View Details
+                  </div>
+                </Link>
+              )}
+              {projects.map(project => (
+                <div key={project.id}>
+                  <div className="sidebar-item nested" onClick={() => toggleProject(project.id)}>
+                    &nbsp;&nbsp;&nbsp;📁 {project.name}&nbsp; {expandedProjects.has(project.id) ? <IoIosArrowUp /> : <IoIosArrowDown />}
                     </div>
                     
                     {expandedProjects.has(project.id) && (
                       <div className="nested-menu">
                         <Link to={`/projects/${project.id}/pages`}>
-                          <div className="sidebar-item nested">
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📋 View All Pages
+                          <div className={`sidebar-item nested ${isActiveRoute(`/projects/${project.id}/pages`) ? 'active' : ''}`}>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📋 View Details
                           </div>
                         </Link>
                         
@@ -167,15 +176,15 @@ const Sidebar = () => {
                           projectPages[project.id].map(page => (
                             <div key={page.id}>
                               <div className="sidebar-item nested" onClick={() => togglePage(project.id, page.id)}>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 {page.name} {expandedPages.has(`${project.id}-${page.id}`) ? '⬆️' : '⬇️'}
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 {page.name}&nbsp; {expandedPages.has(`${project.id}-${page.id}`) ? <IoIosArrowUp /> : <IoIosArrowDown />}
                                 {loadingKeys[`${project.id}-${page.id}`] && <span>&nbsp;⏳</span>}
                               </div>
                               
                               {expandedPages.has(`${project.id}-${page.id}`) && (
                                 <div className="nested-menu">
                                   <Link to={`/projects/${project.id}/pages/${page.id}/translation-keys`}>
-                                    <div className="sidebar-item nested">
-                                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔑 View All Keys
+                                    <div className={`sidebar-item nested ${isActiveRoute(`/projects/${project.id}/pages/${page.id}/translation-keys`) ? 'active' : ''}`}>
+                                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📋 View Details
                                     </div>
                                   </Link>
                                   
@@ -192,8 +201,8 @@ const Sidebar = () => {
                                   ) : (
                                     pageKeys[`${project.id}-${page.id}`].map(key => (
                                       <Link key={key.id} to={`/projects/${project.id}/pages/${page.id}/translation-keys/${key.id}/translations`}>
-                                        <div className="sidebar-item nested">
-                                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔑 {key.key}
+                                        <div className={`sidebar-item nested ${isActiveRoute(`/projects/${project.id}/pages/${page.id}/translation-keys/${key.id}/translations`) ? 'active' : ''}`}>
+                                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔑 {key.keyName}
                                         </div>
                                       </Link>
                                     ))
@@ -207,7 +216,7 @@ const Sidebar = () => {
                     )}
                   </div>
                 ))
-              )}
+              }
             </div>
           )}
         </div>
@@ -217,4 +226,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
