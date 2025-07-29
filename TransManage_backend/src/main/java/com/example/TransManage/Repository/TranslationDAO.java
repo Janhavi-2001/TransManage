@@ -15,7 +15,7 @@ public class TranslationDAO {
 
     static {
         translations.getTranslationList().add(new Translation(1L, 1, "Hindi", "humare application ka swagat hai", "in review", 1001L, "Change", LocalDateTime.now(), LocalDateTime.now()));
-        translations.getTranslationList().add(new Translation(2L, 2, "Japanese", "アプリケーションをご利用いただきありがとうございます。", "approved", 1002L, "Sounds Good." ,LocalDateTime.now(), LocalDateTime.now()));
+        translations.getTranslationList().add(new Translation(2L, 1, "Japanese", "アプリケーションをご利用いただきありがとうございます。", "approved", 1002L, "Sounds Good." ,LocalDateTime.now(), LocalDateTime.now()));
     }
 
     // Method to get all translations by key ID

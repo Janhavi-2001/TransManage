@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button, Modal, Form, Input, Table, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons';
 import { getTranslations, createTranslation, updateTranslation, deleteTranslation } from '../../../../../../api/translationsApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Checkbox, Select } from 'antd';
+import { Select } from 'antd';
 import './Translations.css';
 import Sidebar from '../../../../Sidebar/Sidebar';
 import languageToCountryCode from '../../../../../../Data/languageToCountryCode';
@@ -160,6 +160,7 @@ const Translations = () => {
                             let color = 'green';
                             if (text === 'in review') color = 'orange';
                             else if (text === 'rejected') color = 'red';
+                            else if(text === 'pending') color = 'grey';
                             return <Tag color={color}>{text}</Tag>;
                         }
                     },
