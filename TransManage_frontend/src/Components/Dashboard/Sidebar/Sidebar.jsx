@@ -8,8 +8,8 @@ import { getTranslationKeys } from '../../../api/translationkeysApi';
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 
 const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(true);
-  const [showProjects, setShowProjects] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [showProjects, setShowProjects] = useState(true);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedProjects, setExpandedProjects] = useState(new Set());
@@ -27,6 +27,20 @@ const Sidebar = () => {
 
   useEffect(() => {
     loadProjects();
+    
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setCollapsed(true);
+      } else {
+        setCollapsed(false);
+        setShowProjects(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadProjects = async () => {
