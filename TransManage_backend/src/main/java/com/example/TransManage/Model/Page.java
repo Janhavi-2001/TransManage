@@ -1,40 +1,83 @@
 package com.example.TransManage.Model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "pages")
 public class Page {
-    private long id;
+
+    public enum PageStatus {
+        ACTIVE,
+        COMPLETED,
+        PENDING,
+        ON_HOLD,
+        CANCELLED
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, updatable = false)
+    private Long id;
+
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'No Name'")
     private String name;
+
+    @Column(nullable = false, columnDefinition = "TEXT DEFAULT 'No Description'")
     private String description;
-    private String content;     // Assuming content is a String, can be changed to another type if needed
-    private long projectId;
-    private String status;
-    private String language;
+
+    @Column(name = "project_id", nullable = false)
+    private Long projectId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", insertable = false, updatable = false)
+    private Project project;
+
+    @Column(columnDefinition = "TEXT DEFAULT 'No Content'", nullable = false)
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'PENDING'")
+    private PageStatus status;
+
+    @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     // Default constructor
     public Page() {}
 
     // Parameterized constructor
-    public Page(long id, String name, String description, String content, long projectId, LocalDateTime createdAt, LocalDateTime updatedAt, String status, String language) 
+    public Page(Long id, String name, String description, Long projectId, String content, PageStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) 
     {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.content = content;
         this.projectId = projectId;
+        this.content = content;
+        this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.status = status;
-        this.language = language;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     // Getters and Setters
-    public long getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
     public String getName() {
@@ -49,29 +92,26 @@ public class Page {
     public void setDescription(String description) {
         this.description = description;
     }
+    public Long getProjectId() {
+        return projectId;
+    }
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+    public String getBaseLanguage() {
+        return project != null ? project.getBaseLanguage() : null;
+    }
     public String getContent() {
         return content;
     }
     public void setContent(String content) {
         this.content = content;
     }
-    public long getProjectId() {
-        return projectId;
-    }
-    public void setProjectId(long projectId) {
-        this.projectId = projectId;
-    }
-    public String getStatus() {
+    public PageStatus getStatus() {
         return status;
     }
-    public void setStatus(String status) {
+    public void setStatus(PageStatus status) {
         this.status = status;
-    }
-    public String getLanguage() {
-        return language;
-    }
-    public void setLanguage(String language) {
-        this.language = language;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;

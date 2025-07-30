@@ -1,10 +1,11 @@
 package com.example.TransManage.Controller;
 
 import com.example.TransManage.Model.Page;
-import com.example.TransManage.Repository.PageDAO;
+import com.example.TransManage.Repository.PageRepository;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/pages")
@@ -12,10 +13,10 @@ import java.util.List;
 
 public class PageController {
 
-    private final PageDAO pageDAO;
+    private final PageRepository pageRepository;
 
-    public PageController(PageDAO pageDAO) {
-        this.pageDAO = pageDAO;
+    public PageController(PageRepository pageRepository) {
+        this.pageRepository = pageRepository;
     }
 
 
@@ -28,27 +29,32 @@ public class PageController {
     // Method to get all projects
     @GetMapping
     public List<Page> getAllPages(@PathVariable Long projectId) {
-        return pageDAO.getPagesByProjectId(projectId);
+        return pageRepository.findByProjectId(projectId);
     }
 
     // Method to create a new page
     @PostMapping
     public Page createPage(@PathVariable Long projectId, @RequestBody Page page) {
         page.setProjectId(projectId);
-        pageDAO.createPage(page);
-        return page;
+        return pageRepository.save(page);
     }
 
     // Method to update an existing page
     @PutMapping("/{pageId}")
-    public boolean updatePage(@PathVariable Long pageId, @RequestBody Page page) {
+    public Page updatePage(@PathVariable Long pageId, @RequestBody Page page) {
         page.setId(pageId);
-        return pageDAO.updatePage(page);
+        return pageRepository.save(page);
     }
 
     // Method to delete a page by ID
     @DeleteMapping("/{pageId}")
-    public boolean deletePage(@PathVariable Long pageId) {
-        return pageDAO.removePageById(pageId);
+    public void deletePage(@PathVariable Long pageId) {
+        pageRepository.deleteById(pageId);
+    }
+
+    // Method to get a page by ID
+    public Page getPageById(@PathVariable Long id) {
+        Optional<Page> page = pageRepository.findById(id);
+        return page.orElse(null);
     }
 }

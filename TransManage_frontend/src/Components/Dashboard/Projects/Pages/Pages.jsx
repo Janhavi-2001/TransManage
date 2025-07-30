@@ -134,8 +134,10 @@ const Pages = () => {
                         render: (text) => {
                             const colorMap = {
                                 active: 'green',
-                                pending: 'red',
+                                pending: 'orange',
                                 completed: 'blue',
+                                cancelled: 'red',
+                                onhold: 'grey',
                             };
                             const color = colorMap[text.toLowerCase()] || 'default';
                             return <Tag color={color}>{text}</Tag>;
