@@ -1,20 +1,21 @@
 package com.example.TransManage.Controller;
 
 import com.example.TransManage.Model.Project;
-import com.example.TransManage.Repository.ProjectDAO;
+import com.example.TransManage.Repository.ProjectRepository;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projects")
 @CrossOrigin(origins = "http://localhost:3000")
 
 public class ProjectController {
-    private ProjectDAO projectDAO;
+    private ProjectRepository projectRepository;
 
-    public ProjectController(ProjectDAO projectDAO) {
-        this.projectDAO = projectDAO;
+    public ProjectController(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
     }
     
 
@@ -27,25 +28,32 @@ public class ProjectController {
     // Method to get all projects
     @GetMapping
     public List<Project> getAllProjects() {
-        return projectDAO.getAllProjects();
+        return projectRepository.findAll();
     }
 
     // Method to create a new project
     @PostMapping
-    public void createProject(@RequestBody Project project) {
-        projectDAO.createProject(project);
+    public Project createProject(@RequestBody Project project) {
+        return projectRepository.save(project);
     }
 
     // Method to update an existing project
     @PutMapping("/{id}")
-    public boolean updateProject(@PathVariable Long id, @RequestBody Project project) {
+    public Project updateProject(@PathVariable Long id, @RequestBody Project project) {
         project.setId(id);
-        return projectDAO.updateProject(project);
+        return projectRepository.save(project);
     }
 
     // Method to delete a project by ID
     @DeleteMapping("/{id}")
-    public boolean deleteProject(@PathVariable Long id) {
-        return projectDAO.removeProjectById(id);
+    public void deleteProject(@PathVariable Long id) {
+        projectRepository.deleteById(id);
+    }
+
+    // Method to get a project by ID
+    @GetMapping("/{id}")
+    public Project getProjectById(@PathVariable Long id) {
+        Optional<Project> project = projectRepository.findById(id);
+        return project.orElse(null);
     }
 }

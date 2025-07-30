@@ -1,24 +1,48 @@
 package com.example.TransManage.Model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "projects")
 public class Project {
 
-    // Fields representing project attributes
+    public enum ProjectStatus {
+        ACTIVE,
+        COMPLETED,
+        PENDING,
+        ON_HOLD,
+        CANCELLED
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+    
     private String description;
+
+    @Column(name = "base_language")
     private String baseLanguage;
+
+    @Column(name = "target_languages")
     private String targetLanguages;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private ProjectStatus status;
+
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Default Constructor
     public Project() {}
 
     // Parameterized Constructor
-    public Project(Long id, String name, String description, String baseLanguage, String targetLanguages, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Project(Long id, String name, String description, String baseLanguage, String targetLanguages, ProjectStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -27,6 +51,17 @@ public class Project {
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
     
     // Getters and setters
@@ -60,10 +95,10 @@ public class Project {
     public void setTargetLanguages(String targetLanguages) {
         this.targetLanguages = targetLanguages;
     }
-    public String getStatus() {
+    public ProjectStatus getStatus() {
         return status;
     }
-    public void setStatus(String status) {
+    public void setStatus(ProjectStatus status) {
         this.status = status;
     }
     public LocalDateTime getCreatedAt() {

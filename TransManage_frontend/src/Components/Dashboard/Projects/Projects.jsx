@@ -135,8 +135,10 @@ const Projects = () => {
                             { title: 'Status', dataIndex: 'status', key: 'status', render: (text = '') => {
                                 const colorMap = {
                                     active: 'green',
-                                    pending: 'red',
+                                    pending: 'orange',
                                     completed: 'blue',
+                                    cancelled: 'red',
+                                    onhold: 'grey',
                                 };
 
                                 const color = colorMap[text.toLowerCase()] || 'default';
