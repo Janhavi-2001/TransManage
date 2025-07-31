@@ -1,21 +1,22 @@
 package com.example.TransManage.Controller;
 
 import com.example.TransManage.Model.TranslationKey;
-import com.example.TransManage.Repository.TranslationKeyDAO;
+import com.example.TransManage.Repository.TranslationKeyRepository;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/pages/{pageId}/translation-keys")
 @CrossOrigin(origins = "http://localhost:3000")
 
 public class TranslationKeyController {
-    
-    private final TranslationKeyDAO translationKeyDAO;
 
-    public TranslationKeyController(TranslationKeyDAO translationKeyDAO) {
-        this.translationKeyDAO = translationKeyDAO;
+    private final TranslationKeyRepository translationKeyRepository;
+
+    public TranslationKeyController(TranslationKeyRepository translationKeyRepository) {
+        this.translationKeyRepository = translationKeyRepository;
     }
 
     // Test method to check if the controller is working
@@ -27,28 +28,35 @@ public class TranslationKeyController {
     // Method to get all translation keys
     @GetMapping
     public List<TranslationKey> getAllTranslationKeys(@PathVariable Long projectId, @PathVariable Long pageId) {
-        return translationKeyDAO.getTranslationKeysByPageId(pageId);
+        return translationKeyRepository.findByPageId(pageId);
     }
 
     // Method to create a new translation key
     @PostMapping
     public TranslationKey createTranslationKey(@PathVariable Long projectId, @PathVariable Long pageId, @RequestBody TranslationKey translationKey) {
         translationKey.setPageId(pageId);
-        translationKeyDAO.createTranslationKey(translationKey);
+        translationKeyRepository.save(translationKey);
         return translationKey;
     }
 
     // Method to update an existing translation key
     @PutMapping("/{translationKeyId}")
-    public boolean updateTranslationKey(@PathVariable Long translationKeyId, @RequestBody TranslationKey translationKey) {
+    public TranslationKey updateTranslationKey(@PathVariable Long translationKeyId, @RequestBody TranslationKey translationKey) {
         translationKey.setId(translationKeyId);
-        return translationKeyDAO.updateTranslationKey(translationKey);
+        return translationKeyRepository.save(translationKey);
     }
 
     // Method to delete a translation key by ID
     @DeleteMapping("/{translationKeyId}")
-    public boolean deleteTranslationKey(@PathVariable Long translationKeyId) {
-        return translationKeyDAO.removeTranslationKeyById(translationKeyId);
+    public void deleteTranslationKey(@PathVariable Long translationKeyId) {
+        translationKeyRepository.deleteById(translationKeyId);
+    }
+
+    // Method to get a translation key by ID
+    @GetMapping("/{translationKeyId}")
+    public TranslationKey getTranslationKeyById(@PathVariable Long translationKeyId) {
+        Optional<TranslationKey> translationKey = translationKeyRepository.findById(translationKeyId);
+        return translationKey.orElse(null);
     }
 
 }

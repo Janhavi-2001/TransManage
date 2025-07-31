@@ -216,7 +216,7 @@ const Sidebar = () => {
                                     pageKeys[`${project.id}-${page.id}`].map(key => (
                                       <Link key={key.id} to={`/projects/${project.id}/pages/${page.id}/translation-keys/${key.id}/translations`}>
                                         <div className={`sidebar-item nested ${isActiveRoute(`/projects/${project.id}/pages/${page.id}/translation-keys/${key.id}/translations`) ? 'active' : ''}`}>
-                                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔑 {key.keyName}
+                                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔑 {key.transKeyName}
                                         </div>
                                       </Link>
                                     ))

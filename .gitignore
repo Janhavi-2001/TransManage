@@ -44,3 +44,7 @@ build/
 ./data/
 *.mv.db
 *.trace.db
+*.lock.db
+
+### Log files ###
+*.log

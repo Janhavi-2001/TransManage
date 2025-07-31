@@ -133,13 +133,13 @@ const TranslationKeys = () => {
                 columns={[
                     {
                         title: 'Key',
-                        dataIndex: 'key',
-                        key: 'key',
+                        dataIndex: 'transKey',
+                        key: 'transKey',
                     },
                     {
                         title: 'Key Name',
-                        dataIndex: 'keyName',
-                        key: 'keyName',
+                        dataIndex: 'transKeyName',
+                        key: 'transKeyName',
                     },
                     {
                         title: 'Key Type',
@@ -147,11 +147,11 @@ const TranslationKeys = () => {
                         key: 'keyType',
                         render: (type) => {
                             let color = 'green';
-                            if (type === 'title') {
+                            if (type === 'TITLE') {
                                 color = 'blue';
-                            } else if (type === 'text') {
+                            } else if (type === 'TEXT') {
                                 color = 'orange';
-                            } else if (type === 'button') {
+                            } else if (type === 'BUTTON') {
                                 color = 'red';
                             }
                             return <Tag color={color}>{type}</Tag>;
@@ -219,7 +219,7 @@ const TranslationKeys = () => {
                             isRequired: true
                         }}
                     >
-                        <Form.Item name="keyName" label="Key Name" rules={[{ required: true, message: 'Please enter key name' }]}>
+                        <Form.Item name="trans_key_name" label="Key Name" rules={[{ required: true, message: 'Please enter key name' }]}>
                             <Input placeholder="e.g., welcome_message, submit_button" />
                         </Form.Item>
                         
