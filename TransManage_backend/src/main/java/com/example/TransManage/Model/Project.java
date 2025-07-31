@@ -2,8 +2,6 @@ package com.example.TransManage.Model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "projects")
@@ -43,9 +41,6 @@ public class Project {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Page> pages = new ArrayList<>();
     
     // Default Constructor
     public Project() {}
@@ -121,12 +116,6 @@ public class Project {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-    public List<Page> getPages() {
-        return pages;
-    }
-    public void setPages(List<Page> pages) {
-        this.pages = pages;
     }
 
     @Override
