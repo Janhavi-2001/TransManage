@@ -79,6 +79,17 @@ public class TranslationKey {
         this.updatedAt = updatedAt;
     }
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;
