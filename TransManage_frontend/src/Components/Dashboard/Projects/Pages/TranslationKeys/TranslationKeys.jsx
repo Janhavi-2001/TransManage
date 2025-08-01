@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Modal, Form, Input, Table, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, RightOutlined } from '@ant-design/icons';
 import { getTranslationKeys, createTranslationKey, updateTranslationKey, deleteTranslationKey } from '../../../../../api/translationkeysApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -106,22 +106,13 @@ const TranslationKeys = () => {
         <div className="translation-keys-container">
         <Sidebar />
             <div className="translation-keys-content">
-            <h1>
-                <span 
-                    onClick={() => navigate('/projects')} 
-                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
-                >
-                    Projects
-                </span>
-                {' > '} Project {projectId} {' > '}
-                <span 
-                    onClick={() => navigate(`/projects/${projectId}/pages`)} 
-                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
-                >
-                    Pages
-                </span>
-                {' > '} Page {pageId} {' > '} Translation Keys
-            </h1>
+            <h3>
+                <span style = {{ color: '#525252', marginRight: '4px'}}>Projects</span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Project {projectId} </span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Pages</span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Page {pageId} </span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Translation Keys</span>
+            </h3>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleCreateTranslationKey} className="create-translation-key-button"> Add Translation Key </Button>
 
             <Table

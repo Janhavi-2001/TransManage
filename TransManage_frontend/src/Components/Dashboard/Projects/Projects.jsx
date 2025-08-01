@@ -84,7 +84,7 @@ const Projects = () => {
         <div className="projects-container">
             <Sidebar />
             <div className="projects-content">
-                <h1>Your Translation Projects</h1>
+                <h1 style = {{ color: '#525252'}}>Your Translation Projects</h1>
                 <Button className="create-button" type="primary" icon={<PlusOutlined />} onClick={createProject}>
                     Add Project
                 </Button>

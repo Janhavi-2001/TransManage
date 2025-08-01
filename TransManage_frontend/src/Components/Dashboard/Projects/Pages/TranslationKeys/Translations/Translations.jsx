@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Modal, Form, Input, Table, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined} from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, RightOutlined } from '@ant-design/icons';
 import { getTranslations, createTranslation, updateTranslation, deleteTranslation } from '../../../../../../api/translationsApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -102,29 +102,14 @@ const Translations = () => {
         <div className="translations-container">
         <Sidebar />
             <div className="translations-content">
-            <h1>
-                <span 
-                    onClick={() => navigate('/projects')} 
-                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
-                >
-                    Projects
-                </span>
-                {' > '} Project {projectId} {' > '}
-                <span 
-                    onClick={() => navigate(`/projects/${projectId}/pages`)} 
-                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
-                >
-                    Pages
-                </span>
-                {' > '} Page {pageId} {' > '}
-                <span 
-                    onClick={() => navigate(`/projects/${projectId}/pages/${pageId}/translation-keys`)} 
-                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
-                >
-                    Translation Keys
-                </span>
-                {' > '} Key {translationKeyId} {' > '} Translations
-            </h1>
+            <h3>
+                <span style = {{ color: '#525252', marginRight: '4px'}}>Projects</span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Project {projectId} </span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Pages</span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Page {pageId} </span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Translation Keys</span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Translations</span>
+            </h3>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleCreateTranslation} className="create-translations-button"> Add Translation </Button>
 
             <Table

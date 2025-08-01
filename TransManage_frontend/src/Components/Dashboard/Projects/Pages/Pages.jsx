@@ -1,6 +1,6 @@
 import {React, useState, useEffect} from 'react';
 import { Button, Modal, Form, Input, Table, Tag} from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, RightOutlined } from '@ant-design/icons';
 import { getPages, createPage, updatePage, deletePage } from '../../../../api/pagesApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import './Pages.css';
@@ -76,15 +76,10 @@ const Pages = () => {
         <div className="pages-container">
         <Sidebar />
             <div className="pages-content">
-            <h1>
-                <span 
-                    onClick={() => navigate('/projects')} 
-                    style={{ cursor: 'pointer', color: '#1890ff', textDecoration: 'underline' }}
-                >
-                    Projects
-                </span>
-                {' > '} Project {id} {' > '} Pages
-            </h1>
+            <h3>
+                <span style = {{ color: '#525252', marginRight: '4px'}}>Projects </span>
+                <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Project {id} <RightOutlined style={{ fontSize: '12px', marginRight: '4px' }}/> Pages</span>
+            </h3>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleCreatePage} className="create-page-button"> Add Page </Button>
             
             <Table
