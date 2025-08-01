@@ -3,6 +3,8 @@ package com.example.TransManage.Model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "translation_keys")
 public class TranslationKey {
@@ -22,6 +24,7 @@ public class TranslationKey {
     @Column(name = "page_id", nullable = false)
     private Long pageId;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "page_id", insertable = false, updatable = false)
     private Page page;
 
@@ -29,6 +32,7 @@ public class TranslationKey {
     private Long projectId;
     
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "project_id", insertable = false, updatable = false)
     private Project project;
 

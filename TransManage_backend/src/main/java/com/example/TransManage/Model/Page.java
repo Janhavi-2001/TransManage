@@ -3,6 +3,8 @@ package com.example.TransManage.Model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "pages")
 public class Page {
@@ -30,6 +32,7 @@ public class Page {
     private Long projectId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "project_id", insertable = false, updatable = false)
     private Project project;
 
