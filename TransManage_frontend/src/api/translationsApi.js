@@ -9,7 +9,6 @@ export const getTranslations = async (projectId, pageId, translationKeyId) => {
         return await res.json();
     } catch (error) {
         console.error('Error fetching translations:', error);
-        return [];
     }
 }
 
@@ -28,7 +27,6 @@ export const createTranslation = async (projectId, pageId, translationKeyId, tra
         return await res.json();
     } catch (error) {
         console.error('Error creating translation:', error);
-        throw error;
     }
 }
 
@@ -47,7 +45,6 @@ export const updateTranslation = async (projectId, pageId, translationKeyId, tra
         return await res.json();
     } catch (error) {
         console.error('Error updating translation:', error);
-        throw error;
     }
 }
 
@@ -59,11 +56,13 @@ export const deleteTranslation = async (projectId, pageId, translationKeyId, tra
         if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
         }
-        // For DELETE requests that return boolean, we should handle the response properly
-        const text = await res.text();
-        return text ? JSON.parse(text) : true;
+        
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await res.json();
+        }
+        return true;
     } catch (error) {
         console.error('Error deleting translation:', error);
-        throw error;
     }
 }

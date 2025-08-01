@@ -158,9 +158,9 @@ const Translations = () => {
                         key: 'status',
                         render: (text) => {
                             let color = 'green';
-                            if (text === 'in review') color = 'orange';
-                            else if (text === 'rejected') color = 'red';
-                            else if(text === 'pending') color = 'grey';
+                            if (text === 'IN_REVIEW') color = 'orange';
+                            else if (text === 'REJECTED') color = 'red';
+                            else if(text === 'PENDING') color = 'grey';
                             return <Tag color={color}>{text}</Tag>;
                         }
                     },
@@ -212,7 +212,7 @@ const Translations = () => {
                             status: editingTranslation.status,
                             notes: editingTranslation.notes,
                         } : {
-                            status: 'pending' // Default status for new translations
+                            status: 'PENDING' // Default status for new translations
                         }}
                     >
                     <Form.Item label="Target Language" name="targetLanguage" rules={[{ required: true, message: 'Please enter the target language' }]}>
@@ -223,10 +223,10 @@ const Translations = () => {
                     </Form.Item>
                     <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select the status' }]}>
                         <Select placeholder="Select status">
-                            <Select.Option value="pending">Pending</Select.Option>
-                            <Select.Option value="approved">Approved</Select.Option>
-                            <Select.Option value="in review">In Review</Select.Option>
-                            <Select.Option value="rejected">Rejected</Select.Option>
+                            <Select.Option value="PENDING">Pending</Select.Option>
+                            <Select.Option value="APPROVED">Approved</Select.Option>
+                            <Select.Option value="IN_REVIEW">In Review</Select.Option>
+                            <Select.Option value="REJECTED">Rejected</Select.Option>
                         </Select>
                     </Form.Item>
                     <Form.Item label="Notes" name="notes">
