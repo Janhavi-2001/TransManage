@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Checkbox, Select } from 'antd';
 import './TranslationKeys.css';
 import Sidebar from '../../../Sidebar/Sidebar';
+import { GoAlertFill } from "react-icons/go";
 
 
 const TranslationKeys = () => {
@@ -16,49 +17,28 @@ const TranslationKeys = () => {
     const [editingTranslationKey, setEditingTranslationKey] = useState(null);
     const [form] = Form.useForm();
     const { id: projectId, pageId } = useParams();
+    const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
     useEffect(() => {
-    const fetchTranslationKeys = async () => {
-            try {
-                console.log('Fetching translation keys for projectId:', projectId, 'pageId:', pageId);
-                const response = await getTranslationKeys(projectId, pageId);
-                console.log('Translation keys response:', response);
-                
-                let keysArray = [];
-                if (Array.isArray(response)) {
-                    keysArray = response;
-                } else if (response && Array.isArray(response.data)) {
-                    keysArray = response.data;
-                } else if (response && typeof response === 'object') {
-                    keysArray = Object.values(response);
-                } else {
-                    keysArray = [];
-                }
-                
-                setTranslationKeys(keysArray);
-            } catch (error) {
-                console.error('Error fetching translation keys:', error);
+    const getAllTranslationKeys = async () => {
+        try {
+            const response = await getTranslationKeys(projectId, pageId);
+            if (Array.isArray(response)) {
+                setTranslationKeys(response);
+            } else {
+                console.error('Expected array but got:', response);
                 setTranslationKeys([]);
             }
-        };
+        } catch (error) {
+            console.error('Failed to fetch translation keys:', error);
+            setTranslationKeys([]);
+        }
+    };
 
         if (projectId && pageId) {
-            fetchTranslationKeys();
+            getAllTranslationKeys();
         }
     }, [projectId, pageId]);
-
-    useEffect(() => {
-        if (editingTranslationKey && isModalVisible) {
-            form.setFieldsValue({
-                keyName: editingTranslationKey.keyName,
-                sourceText: editingTranslationKey.sourceText,
-                description: editingTranslationKey.description,
-                keyType: editingTranslationKey.keyType,
-                isRequired: editingTranslationKey.isRequired,
-                characterLimit: editingTranslationKey.characterLimit
-            });
-        }
-    }, [editingTranslationKey, isModalVisible, form]);
 
     const handleViewTranslationKey = (keyId) => {
         navigate(`/projects/${projectId}/pages/${pageId}/translation-keys/${keyId}/translations`);
@@ -73,34 +53,55 @@ const TranslationKeys = () => {
     const handleUpdateTranslationKey = (key) => {
         setEditingTranslationKey(key);
         form.setFieldsValue({
-            keyName: key.keyName,
+            transKeyName: key.transKeyName,
             sourceText: key.sourceText,
             description: key.description,
             keyType: key.keyType,
-            isRequired: key.isRequired,
+            isRequired: Boolean(key.isRequired),
             characterLimit: key.characterLimit
         });
         setIsModalVisible(true);
     };
 
-    const handleDeleteTranslationKey = async (keyId) => {
-        await deleteTranslationKey(projectId, pageId, keyId);
-        setTranslationKeys(translationKeys.filter(key => key.id !== keyId));
-    };
-
     const handleSubmit = async (values) => {
-        if (editingTranslationKey) {
-            await updateTranslationKey(projectId, pageId, editingTranslationKey.id, values);
-            const response = await getTranslationKeys(projectId, pageId);
-            setTranslationKeys(response);
-        } else {
-            await createTranslationKey(projectId, pageId, values);
-            const response = await getTranslationKeys(projectId, pageId);
-            setTranslationKeys(response);
+        try {    
+            const translationKeyData = {
+                ...values,
+                pageId: pageId,
+                projectId: projectId,
+                isRequired: !!values.isRequired,
+                characterLimit: parseInt(values.characterLimit ?? 1000, 10)
+            };
+            
+            if (editingTranslationKey) {
+                await updateTranslationKey(projectId, pageId, editingTranslationKey.id, translationKeyData);
+                const updatedList = await getTranslationKeys(projectId, pageId);
+                setTranslationKeys(updatedList);
+            } else {
+                const newKey = await createTranslationKey(projectId, pageId, translationKeyData);                
+                if (newKey) {
+                    setTranslationKeys(prev => [...prev, newKey]);
+                } else {
+                    const refreshedList = await getTranslationKeys(projectId, pageId);
+                    setTranslationKeys(refreshedList);
+                }
+            }
+            setIsModalVisible(false);
+            form.resetFields();
+        } catch (error) {
+            console.error('Failed to save translation key:', error);
         }
-        setIsModalVisible(false);
-        form.resetFields();
-    };
+    }
+
+    const handleDeleteTranslationKey = async (keyId) => {
+        try {
+            await deleteTranslationKey(projectId, pageId, keyId);
+            setTranslationKeys(translationKeys.filter(key => key.id !== keyId));
+            setDeleteConfirmation(null);
+        } catch (error) {
+            console.error('Failed to delete translation key:', error);
+        }
+    }
 
     return (
         <div className="translation-keys-container">
@@ -181,13 +182,35 @@ const TranslationKeys = () => {
                             <>
                                 <Button className="view-button" icon={<EyeOutlined />} onClick={() => handleViewTranslationKey(record.id)} />
                                 <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdateTranslationKey(record)} />
-                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => handleDeleteTranslationKey(record.id)} />
+                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => setDeleteConfirmation({ transKeyName: record.transKeyName, id: record.id })} />
                             </>
                         ),
                     },
                 ]}
             />
-
+            <Modal
+                title="Delete Translation Key"
+                open={!!deleteConfirmation}
+                onCancel={() => setDeleteConfirmation(null)}
+                footer={null}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                    <GoAlertFill style={{ color: '#ff4d4f', fontSize: '48px', marginRight: '12px' }} />
+                    <div>
+                        <p style={{ margin: 10, fontSize: '16px', fontWeight: '500' }}>
+                            Are you sure you want to delete <strong>{deleteConfirmation?.transKeyName}</strong>?
+                        </p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                    <Button onClick={() => setDeleteConfirmation(null)}>
+                        Cancel
+                    </Button>
+                    <Button type="primary" danger onClick={() => handleDeleteTranslationKey(deleteConfirmation?.id)}>
+                        Delete
+                    </Button>
+                </div>
+            </Modal>
             <Modal
                 title={editingTranslationKey ? 'Edit Translation Key' : 'Create Translation Key'}
                 open={isModalVisible}
@@ -199,18 +222,9 @@ const TranslationKeys = () => {
                         layout="horizontal" 
                         form={form}
                         onFinish={handleSubmit}
-                        initialValues={editingTranslationKey ? { 
-                            keyName: editingTranslationKey.keyName, 
-                            sourceText: editingTranslationKey.sourceText, 
-                            description: editingTranslationKey.description,
-                            keyType: editingTranslationKey.keyType,
-                            isRequired: editingTranslationKey.isRequired,
-                            characterLimit: editingTranslationKey.characterLimit
-                        } : {
-                            isRequired: true
-                        }}
+                        initialValues={editingTranslationKey ? { transKeyName: editingTranslationKey.transKeyName, sourceText: editingTranslationKey.sourceText, description: editingTranslationKey.description, keyType: editingTranslationKey.keyType, isRequired: editingTranslationKey.isRequired, characterLimit: editingTranslationKey.characterLimit } : {}}
                     >
-                        <Form.Item name="trans_key_name" label="Key Name" rules={[{ required: true, message: 'Please enter key name' }]}>
+                        <Form.Item name="transKeyName" label="Key Name" rules={[{ required: true, message: 'Please enter key name' }]}>
                             <Input placeholder="e.g., welcome_message, submit_button" />
                         </Form.Item>
                         
@@ -224,11 +238,10 @@ const TranslationKeys = () => {
                         
                         <Form.Item name="keyType" label="Key Type" rules={[{ required: true, message: 'Please select key type' }]}>
                             <Select placeholder="Select key type">
-                                <Select.Option value="title">Title</Select.Option>
-                                <Select.Option value="button">Button</Select.Option>
-                                <Select.Option value="text">Text</Select.Option>
-                                <Select.Option value="placeholder">Placeholder</Select.Option>
-                                <Select.Option value="error">Error</Select.Option>
+                                <Select.Option value="TITLE">Title</Select.Option>
+                                <Select.Option value="BUTTON">Button</Select.Option>
+                                <Select.Option value="TEXT">Text</Select.Option>
+                                <Select.Option value="PLACEHOLDER">Placeholder</Select.Option>
                             </Select>
                         </Form.Item>
                         

@@ -34,16 +34,53 @@ public class TranslationKeyController {
     // Method to create a new translation key
     @PostMapping
     public TranslationKey createTranslationKey(@PathVariable Long projectId, @PathVariable Long pageId, @RequestBody TranslationKey translationKey) {
+        translationKey.setProjectId(projectId);
         translationKey.setPageId(pageId);
-        translationKeyRepository.save(translationKey);
-        return translationKey;
+
+        if(translationKey.getRequired() == null) {
+            translationKey.setRequired(false);
+        }
+        
+        if(translationKey.getCharacterLimit() == null) {
+            translationKey.setCharacterLimit(1000);
+        }
+        
+        if(translationKey.getTransKey() == null || translationKey.getTransKey().isEmpty()) {
+            long keyCount = translationKeyRepository.countByPageId(pageId);
+            long nextKeyNumber = keyCount + 1;
+            
+            String generatedKey = String.format("proj%d_page%d_key%d", 
+                projectId, pageId, nextKeyNumber);
+            
+            translationKey.setTransKey(generatedKey);
+        }
+        
+        return translationKeyRepository.save(translationKey);
     }
 
     // Method to update an existing translation key
     @PutMapping("/{translationKeyId}")
     public TranslationKey updateTranslationKey(@PathVariable Long translationKeyId, @RequestBody TranslationKey translationKey) {
-        translationKey.setId(translationKeyId);
-        return translationKeyRepository.save(translationKey);
+        TranslationKey existingTranslationKey = translationKeyRepository.findById(translationKeyId)
+            .orElseThrow(() -> new RuntimeException("Translation Key not found"));
+
+        existingTranslationKey.setTransKeyName(translationKey.getTransKeyName());
+        existingTranslationKey.setSourceText(translationKey.getSourceText());
+        existingTranslationKey.setDescription(translationKey.getDescription());
+        existingTranslationKey.setKeyType(translationKey.getKeyType());
+        
+        if (translationKey.getRequired() != null) {
+            existingTranslationKey.setRequired(translationKey.getRequired());
+        }
+
+        if (translationKey.getCharacterLimit() != null) {
+            existingTranslationKey.setCharacterLimit(translationKey.getCharacterLimit());
+        }
+        
+        existingTranslationKey.setProjectId(translationKey.getProjectId());
+        existingTranslationKey.setPageId(translationKey.getPageId());
+
+        return translationKeyRepository.save(existingTranslationKey);
     }
 
     // Method to delete a translation key by ID

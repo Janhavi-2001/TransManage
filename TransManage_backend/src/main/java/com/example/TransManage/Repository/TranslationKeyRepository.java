@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface TranslationKeyRepository extends JpaRepository<TranslationKey, Long> {
     List<TranslationKey> findByPageId(Long pageId);
+    long countByPageId(Long pageId);
 }

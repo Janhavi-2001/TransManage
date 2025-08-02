@@ -143,11 +143,11 @@ public class TranslationKey {
     public void setKeyType(KeyType keyType) {
         this.keyType = keyType;
     }
-    public Boolean isRequired() {
+    public Boolean getRequired() {
         return isRequired;
     }
-    public void setRequired(Boolean required) {
-        isRequired = required;
+    public void setRequired(Boolean isRequired) {
+        this.isRequired = isRequired;
     }
     public Integer getCharacterLimit() {
         return characterLimit;

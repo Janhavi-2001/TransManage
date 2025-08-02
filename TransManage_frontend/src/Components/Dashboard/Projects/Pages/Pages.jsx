@@ -69,7 +69,7 @@ const Pages = () => {
                 await updatePage(id, editingPage.id, pageData);
                 const updatedList = await getPages(id);
                 setPages(updatedList);
-                } else {
+            } else {
                 const newPage = await createPage(id, pageData);
                 setPages([...pages, newPage]);
             }
