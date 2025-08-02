@@ -7,6 +7,7 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-de
 import { getProjects, createProject, updateProject, deleteProject } from '../../../api/projectsApi';
 import languageToCountryCode from '../../../Data/languageToCountryCode';
 import ReactCountryFlag from 'react-country-flag';
+import { GoAlertFill } from "react-icons/go";
 
 
 const Projects = () => {
@@ -15,6 +16,7 @@ const Projects = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [form] = Form.useForm();
+    const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
     const flagStyle = { width: '1.3em', height: '1.3em', marginRight: '0.4em', verticalAlign: 'middle' };
 
@@ -36,32 +38,44 @@ const Projects = () => {
         getAllProjects();
     }, []);
 
-    const viewProject = (id) => {
+    const handleViewProject = (id) => {
         window.location.href = `/projects/${id}`;
     }
 
-    const createProject = () => {
+    const handleCreateProject = () => {
         setEditingProject(null);
         form.resetFields();
         setIsModalVisible(true);
     }
 
-    const updateProject = (project) => {
+    const handleUpdateProject = (project) => {
         setEditingProject(project);
         form.setFieldsValue({
             name: project.name,
             description: project.description,
+            baseLanguage: project.baseLanguage,
+            targetLanguages: project.targetLanguages ? project.targetLanguages.split(',').map(lang => lang.trim()) : [],
+            status: project.status,
         });
         setIsModalVisible(true);
     }
 
     const handleSubmit = async (values) => {
         try {
+            const projectData = {
+            ...values,
+            targetLanguages: Array.isArray(values.targetLanguages) 
+                ? values.targetLanguages.join(', ') 
+                : values.targetLanguages || '',
+                status: values.status || (editingProject ? editingProject.status : 'PENDING') // ✅
+            };
+
             if (editingProject) {
-                await updateProject(editingProject.id, values);
-                setProjects(projects.map(p => p.id === editingProject.id ? { ...p, ...values } : p));
+                await updateProject(editingProject.id, projectData);
+                const updatedList = await getProjects();
+                setProjects(updatedList);
             } else {
-                const newProject = await createProject(values);
+                const newProject = await createProject(projectData);
                 setProjects([...projects, newProject]);
             }
             setIsModalVisible(false);
@@ -70,10 +84,11 @@ const Projects = () => {
         }
     }
 
-    const deleteProject = async (id) => {
+    const handleDeleteProject = async (id) => {
         try {
             await deleteProject(id);
             setProjects(projects.filter(p => p.id !== id));
+            setDeleteConfirmation(null);
         } catch (error) {
             console.error('Failed to delete project:', error);
         }
@@ -85,12 +100,12 @@ const Projects = () => {
             <Sidebar />
             <div className="projects-content">
                 <h1 style = {{ color: '#525252'}}>Your Translation Projects</h1>
-                <Button className="create-button" type="primary" icon={<PlusOutlined />} onClick={createProject}>
+                <Button className="create-button" type="primary" icon={<PlusOutlined />} onClick={handleCreateProject}>
                     Add Project
                 </Button>
                 <Table
                     className="projects-table"
-                    pagination={{ pageSize: 10 }}
+                    pagination={{ pageSize: 5 }}
                     dataSource={projects}
                     scroll={{ x: 'max-content' }}
                     rowKey="id"
@@ -147,13 +162,40 @@ const Projects = () => {
                             }},
                             { title: 'Actions', key: 'actions', render: (_, record) => (
                             <>
-                                <Button className="view-button" icon={<EyeOutlined />} onClick={() => viewProject(`${record.id}/pages`)} />
-                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => updateProject(record)} />
-                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => deleteProject(record.id)} />
+                                <Button className="view-button" icon={<EyeOutlined />} onClick={() => handleViewProject(`${record.id}/pages`)} />
+                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdateProject(record)} />
+                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => setDeleteConfirmation({ id: record.id, name: record.name })} />
                             </>
                         ) },
                     ]}
                 />
+                <Modal
+                    title="Delete Project"
+                    open={!!deleteConfirmation}
+                    onCancel={() => setDeleteConfirmation(null)}
+                    footer={null}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                        <GoAlertFill style={{ color: '#ff4d4f', fontSize: '48px', marginRight: '12px' }} />
+                        <div>
+                            <p style={{ margin: 10, fontSize: '16px', fontWeight: '500' }}>
+                                Are you sure you want to delete <strong>{deleteConfirmation?.name}</strong>?
+                            </p>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <Button onClick={() => setDeleteConfirmation(null)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="primary" 
+                            danger 
+                            onClick={() => handleDeleteProject(deleteConfirmation?.id)}
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                </Modal>
                 <Modal
                     title={editingProject ? 'Edit Project' : 'Add Project'}
                     open={isModalVisible}
@@ -193,6 +235,22 @@ const Projects = () => {
                                 ))}
                             </Select>
                         </Form.Item>
+                        {editingProject && (
+                        <Form.Item
+                            name="status"
+                            label="Status"
+                            className="form-input"
+                            rules={[{ required: true, message: 'Please select status' }]}
+                        >
+                            <Select placeholder="Select project status">
+                            {['PENDING', 'ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED'].map(status => (
+                                <Select.Option key={status} value={status}>
+                                {status}
+                                </Select.Option>
+                            ))}
+                            </Select>
+                        </Form.Item>
+                        )}
                         <Form.Item style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                             <Button type="primary" htmlType="submit" className='form-submit-button'>
                                 {editingProject ? 'Update Project' : 'Create Project'}

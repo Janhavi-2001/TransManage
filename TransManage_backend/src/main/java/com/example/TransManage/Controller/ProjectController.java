@@ -34,14 +34,27 @@ public class ProjectController {
     // Method to create a new project
     @PostMapping
     public Project createProject(@RequestBody Project project) {
+        if(project.getStatus() == null) {
+            project.setStatus(Project.ProjectStatus.PENDING);
+        }
         return projectRepository.save(project);
     }
 
     // Method to update an existing project
     @PutMapping("/{id}")
-    public Project updateProject(@PathVariable Long id, @RequestBody Project project) {
-        project.setId(id);
-        return projectRepository.save(project);
+    public Project updateProject(@PathVariable Long id, @RequestBody Project incomingProject) {
+        Project existingProject = projectRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        existingProject.setName(incomingProject.getName());
+        existingProject.setDescription(incomingProject.getDescription());
+        existingProject.setBaseLanguage(incomingProject.getBaseLanguage());
+        existingProject.setTargetLanguages(incomingProject.getTargetLanguages());
+
+        if (incomingProject.getStatus() != null) {
+            existingProject.setStatus(incomingProject.getStatus());
+        }
+        return projectRepository.save(existingProject);
     }
 
     // Method to delete a project by ID

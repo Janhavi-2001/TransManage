@@ -9,6 +9,7 @@ export const getProjects = async () => {
         return await res.json();
     } catch (error) {
         console.error('Error fetching projects:', error);
+        throw error; // Re-throw to handle it in the component
     }
 };
 
@@ -25,6 +26,7 @@ export const createProject = async (project) => {
         return await res.json();
     } catch (error) {
         console.error('Error creating project:', error);
+        throw error;
     }
 };
 
@@ -41,6 +43,7 @@ export const updateProject = async (id, project) => {
         return await res.json();
     } catch (error) {
         console.error('Error updating project:', error);
+        throw error;
     }
 };
 
@@ -54,6 +57,7 @@ export const deleteProject = async (id) => {
         }
     } catch (error) {
         console.error('Error deleting project:', error);
+        throw error;
     }
 };
 
@@ -66,5 +70,6 @@ export const getProjectById = async (id) => {
         return await res.json();
     } catch (error) {
         console.error('Error fetching project by ID:', error);
+        throw error;
     }
 };
