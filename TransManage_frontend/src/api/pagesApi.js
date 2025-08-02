@@ -3,6 +3,9 @@ const API_BASE = 'http://localhost:8080/api/projects';
 export const getPages = async (projectId) => {
     try {
         const res = await fetch(`${API_BASE}/${projectId}/pages`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         return await res.json();
     } catch (error) {
         console.error('Error fetching pages:', error);
@@ -19,6 +22,9 @@ export const createPage = async (projectId, pageData) => {
             },
             body: JSON.stringify(pageData),
         });
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         return await res.json();
     } catch (error) {
         console.error('Error creating page:', error);
@@ -35,6 +41,9 @@ export const updatePage = async (projectId, pageId, pageData) => {
             },
             body: JSON.stringify(pageData),
         });
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         return await res.json();
     } catch (error) {
         console.error('Error updating page:', error);
@@ -47,9 +56,24 @@ export const deletePage = async (projectId, pageId) => {
         const res = await fetch(`${API_BASE}/${projectId}/pages/${pageId}`, {
             method: 'DELETE',
         });
-        return await res.json();
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
     } catch (error) {
         console.error('Error deleting page:', error);
         throw error;
     }
 }
+
+export const getPageById = async (projectId, pageId) => {
+    try {
+        const res = await fetch(`${API_BASE}/${projectId}/pages/${pageId}`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error fetching page by ID:', error);
+        throw error;
+    }
+};

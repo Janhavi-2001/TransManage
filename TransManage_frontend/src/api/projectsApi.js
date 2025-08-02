@@ -9,7 +9,7 @@ export const getProjects = async () => {
         return await res.json();
     } catch (error) {
         console.error('Error fetching projects:', error);
-        throw error; // Re-throw to handle it in the component
+        throw error;
     }
 };
 

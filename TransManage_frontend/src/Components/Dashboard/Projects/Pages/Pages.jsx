@@ -1,10 +1,11 @@
 import {React, useState, useEffect} from 'react';
-import { Button, Modal, Form, Input, Table, Tag} from 'antd';
+import { Button, Modal, Form, Input, Table, Tag, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, RightOutlined } from '@ant-design/icons';
 import { getPages, createPage, updatePage, deletePage } from '../../../../api/pagesApi';
 import { useNavigate, useParams } from 'react-router-dom';
 import './Pages.css';
 import Sidebar from '../../Sidebar/Sidebar';
+import { GoAlertFill } from "react-icons/go";
 
 const Pages = () => {
 
@@ -14,64 +15,81 @@ const Pages = () => {
     const [editingPage, setEditingPage] = useState(null);
     const [form] = Form.useForm();
     const { id } = useParams();
+    const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
     useEffect(() => {
-        const fetchPages = async () => {
-            const response = await getPages(id);
-            setPages(response);
+        const getAllPages = async () => {
+            try {
+                const response = await getPages(id);
+                if (Array.isArray(response)) {
+                    setPages(response);
+                } else {
+                    console.error('Expected array but got:', response);
+                    setPages([]);
+                }
+            } catch (error) {
+                console.error('Failed to fetch pages:', error);
+                setPages([]);
+            }
         };
-
-        fetchPages();
+        getAllPages();
     }, [id]);
 
     const handleViewPage = (pageId) => {
         navigate(`/projects/${id}/pages/${pageId}/translation-keys`);
     };
 
-
     const handleCreatePage = () => {
         setEditingPage(null);
         form.resetFields();
         setIsModalVisible(true);
     }
+
     const handleUpdatePage = (page) => {
         setEditingPage(page);
         form.setFieldsValue({
             name: page.name,
             description: page.description,
             content: page.content,
+            status: page.status
         });
         setIsModalVisible(true);
     }
-    const handleDeletePage = async (pageId) => {
-        await deletePage(pageId);
-        setPages(pages.filter(page => page.id !== pageId));
-    }
+
     const handleSubmit = async (values) => {
-        if (editingPage) {
-            await updatePage(editingPage.id, values);
-            const response = await getPages(id);
-            console.log('Updated pages response:', response);
-            if (response && response.pages) {
-                if (Array.isArray(response.pages)) {
-                    setPages(response.pages);
-                } else if (typeof response.pages === 'object') {
-                    setPages(Object.values(response.pages));
+        try {
+            const pageData = {
+            ...values,
+                pageId: editingPage ? editingPage.id : null,
+                projectId: id,
+                status: values.status || (editingPage ? editingPage.status : 'PENDING')
+            };
+
+            if (editingPage) {
+                await updatePage(id, editingPage.id, pageData);
+                const updatedList = await getPages(id);
+                setPages(updatedList);
                 } else {
-                    console.error('Unexpected pages format:', response.pages);
-                    setPages([]);
-                }
-                } else {
-                setPages([]);
-                }
-        } else {
-            const newPage = await createPage(id, values);
-            setPages([...pages, newPage]);
+                const newPage = await createPage(id, pageData);
+                setPages([...pages, newPage]);
+            }
+            setIsModalVisible(false);
+            form.resetFields();
+        } catch (error) {
+            console.error('Failed to save page:', error);
         }
-        setIsModalVisible(false);
-        form.resetFields();
     }
-    
+
+    const handleDeletePage = async (pageId) => {
+        try {
+            await deletePage(id, pageId);
+            setPages(pages.filter(p => p.id !== pageId));
+            setDeleteConfirmation(null);
+        } catch (error) {
+            console.error('Failed to delete page:', error);
+        }
+    }
+
     return (
         <div className="pages-container">
         <Sidebar />
@@ -84,7 +102,7 @@ const Pages = () => {
             
             <Table
                 className="pages-table"
-                pagination={{ pageSize: 10 }}
+                pagination={{ pageSize: 5 }}
                 dataSource={pages}
                 scroll={{ x: 'max-content' }}
                 rowKey="id"
@@ -141,13 +159,35 @@ const Pages = () => {
                     { title: 'Actions', key: 'actions', render: (_, record) => (
                             <>
                                 <Button className="view-button" icon={<EyeOutlined />} onClick={() => handleViewPage(record.id)} />
-                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdatePage(record.id)} />
-                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => handleDeletePage(record.id)} />
+                                <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdatePage(record)} />
+                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => setDeleteConfirmation({ id: record.id, name: record.name })} />
                             </>
                     ) },
                 ]}
             />
-
+            <Modal
+                title="Delete Page"
+                open={!!deleteConfirmation}
+                onCancel={() => setDeleteConfirmation(null)}
+                footer={null}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                    <GoAlertFill style={{ color: '#ff4d4f', fontSize: '48px', marginRight: '12px' }} />
+                    <div>
+                        <p style={{ margin: 10, fontSize: '16px', fontWeight: '500' }}>
+                            Are you sure you want to delete <strong>{deleteConfirmation?.name}</strong>?
+                        </p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                    <Button onClick={() => setDeleteConfirmation(null)}>
+                        Cancel
+                    </Button>
+                    <Button type="primary" danger onClick={() => handleDeletePage(deleteConfirmation?.id)}>
+                        Delete
+                    </Button>
+                </div>
+            </Modal>
             <Modal
                 title={editingPage ? 'Edit Page' : 'Create Page'}
                 open={isModalVisible}
@@ -170,6 +210,22 @@ const Pages = () => {
                     <Form.Item name="content" label="Content" rules={[{ required: true, message: 'Please enter page content' }]}>
                         <Input.TextArea rows={4} />
                     </Form.Item>
+                    {editingPage && (
+                        <Form.Item
+                            name="status"
+                            label="Status"
+                            className="form-input"
+                            rules={[{ required: true, message: 'Please select status' }]}
+                        >
+                            <Select placeholder="Select page status">
+                            {['PENDING', 'ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED'].map(status => (
+                                <Select.Option key={status} value={status}>
+                                {status}
+                                </Select.Option>
+                            ))}
+                            </Select>
+                        </Form.Item>
+                        )}
                     <Form.Item style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <Button type="primary" htmlType="submit">
                             {editingPage ? 'Update Page' : 'Create Page'}

@@ -67,7 +67,7 @@ const Projects = () => {
             targetLanguages: Array.isArray(values.targetLanguages) 
                 ? values.targetLanguages.join(', ') 
                 : values.targetLanguages || '',
-                status: values.status || (editingProject ? editingProject.status : 'PENDING') // ✅
+                status: values.status || (editingProject ? editingProject.status : 'PENDING')
             };
 
             if (editingProject) {
@@ -79,6 +79,7 @@ const Projects = () => {
                 setProjects([...projects, newProject]);
             }
             setIsModalVisible(false);
+            form.resetFields();
         } catch (error) {
             console.error('Failed to save project:', error);
         }

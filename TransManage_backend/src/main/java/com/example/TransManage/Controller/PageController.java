@@ -36,14 +36,27 @@ public class PageController {
     @PostMapping
     public Page createPage(@PathVariable Long projectId, @RequestBody Page page) {
         page.setProjectId(projectId);
+        if(page.getStatus() == null) {
+            page.setStatus(Page.PageStatus.PENDING);
+        }
         return pageRepository.save(page);
     }
 
     // Method to update an existing page
     @PutMapping("/{pageId}")
-    public Page updatePage(@PathVariable Long pageId, @RequestBody Page page) {
-        page.setId(pageId);
-        return pageRepository.save(page);
+    public Page updatePage(@PathVariable Long pageId, @RequestBody Page incomingPage) {
+        Page existingPage = pageRepository.findById(pageId)
+            .orElseThrow(() -> new RuntimeException("Page not found"));
+
+        existingPage.setName(incomingPage.getName());
+        existingPage.setDescription(incomingPage.getDescription());
+        existingPage.setContent(incomingPage.getContent());
+        existingPage.setProjectId(incomingPage.getProjectId());
+
+        if (incomingPage.getStatus() != null) {
+            existingPage.setStatus(incomingPage.getStatus());
+        }
+        return pageRepository.save(existingPage);
     }
 
     // Method to delete a page by ID
