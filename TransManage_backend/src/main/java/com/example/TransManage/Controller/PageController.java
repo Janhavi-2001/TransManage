@@ -44,17 +44,17 @@ public class PageController {
 
     // Method to update an existing page
     @PutMapping("/{pageId}")
-    public Page updatePage(@PathVariable Long pageId, @RequestBody Page incomingPage) {
+    public Page updatePage(@PathVariable Long pageId, @RequestBody Page Page) {
         Page existingPage = pageRepository.findById(pageId)
             .orElseThrow(() -> new RuntimeException("Page not found"));
 
-        existingPage.setName(incomingPage.getName());
-        existingPage.setDescription(incomingPage.getDescription());
-        existingPage.setContent(incomingPage.getContent());
-        existingPage.setProjectId(incomingPage.getProjectId());
+        existingPage.setName(Page.getName());
+        existingPage.setDescription(Page.getDescription());
+        existingPage.setContent(Page.getContent());
+        existingPage.setProjectId(Page.getProjectId());
 
-        if (incomingPage.getStatus() != null) {
-            existingPage.setStatus(incomingPage.getStatus());
+        if (Page.getStatus() != null) {
+            existingPage.setStatus(Page.getStatus());
         }
         return pageRepository.save(existingPage);
     }

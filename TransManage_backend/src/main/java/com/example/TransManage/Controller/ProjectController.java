@@ -42,17 +42,17 @@ public class ProjectController {
 
     // Method to update an existing project
     @PutMapping("/{id}")
-    public Project updateProject(@PathVariable Long id, @RequestBody Project incomingProject) {
+    public Project updateProject(@PathVariable Long id, @RequestBody Project Project) {
         Project existingProject = projectRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        existingProject.setName(incomingProject.getName());
-        existingProject.setDescription(incomingProject.getDescription());
-        existingProject.setBaseLanguage(incomingProject.getBaseLanguage());
-        existingProject.setTargetLanguages(incomingProject.getTargetLanguages());
+        existingProject.setName(Project.getName());
+        existingProject.setDescription(Project.getDescription());
+        existingProject.setBaseLanguage(Project.getBaseLanguage());
+        existingProject.setTargetLanguages(Project.getTargetLanguages());
 
-        if (incomingProject.getStatus() != null) {
-            existingProject.setStatus(incomingProject.getStatus());
+        if (Project.getStatus() != null) {
+            existingProject.setStatus(Project.getStatus());
         }
         return projectRepository.save(existingProject);
     }
