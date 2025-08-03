@@ -9,6 +9,7 @@ export const getTranslations = async (projectId, pageId, translationKeyId) => {
         return await res.json();
     } catch (error) {
         console.error('Error fetching translations:', error);
+        throw error;
     }
 }
 
@@ -27,6 +28,7 @@ export const createTranslation = async (projectId, pageId, translationKeyId, tra
         return await res.json();
     } catch (error) {
         console.error('Error creating translation:', error);
+        throw error;
     }
 }
 
@@ -45,6 +47,7 @@ export const updateTranslation = async (projectId, pageId, translationKeyId, tra
         return await res.json();
     } catch (error) {
         console.error('Error updating translation:', error);
+        throw error;
     }
 }
 
@@ -61,8 +64,21 @@ export const deleteTranslation = async (projectId, pageId, translationKeyId, tra
         if (contentType && contentType.includes('application/json')) {
             return await res.json();
         }
-        return true;
     } catch (error) {
         console.error('Error deleting translation:', error);
+        throw error;
     }
 }
+
+export const getTranslationById = async (projectId, pageId, translationKeyId) => {
+    try {
+        const res = await fetch(`${API_BASE}/${projectId}/pages/${pageId}/translation-keys/${translationKeyId}/translations`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error fetching translation by ID:', error);
+        throw error;
+    }
+};

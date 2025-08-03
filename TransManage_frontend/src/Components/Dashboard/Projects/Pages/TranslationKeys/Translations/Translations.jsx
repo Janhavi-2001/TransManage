@@ -2,65 +2,65 @@ import React from 'react';
 import { Button, Modal, Form, Input, Table, Tag } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, RightOutlined } from '@ant-design/icons';
 import { getTranslations, createTranslation, updateTranslation, deleteTranslation } from '../../../../../../api/translationsApi';
-import { useNavigate, useParams } from 'react-router-dom';
+import { getProjectById } from '../../../../../../api/projectsApi'; // Add this import
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Select } from 'antd';
 import './Translations.css';
 import Sidebar from '../../../../Sidebar/Sidebar';
 import languageToCountryCode from '../../../../../../Data/languageToCountryCode';
 import ReactCountryFlag from 'react-country-flag';
+import { GoAlertFill } from 'react-icons/go';
 
 
 const Translations = () => {
-    const navigate = useNavigate();
     const [translations, setTranslations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTranslation, setEditingTranslation] = useState(null);
     const [form] = Form.useForm();
     const { id: projectId, pageId, translationKeyId } = useParams();
+    const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+    const [projectTargetLanguages, setProjectTargetLanguages] = useState([]);
 
     const flagStyle = { width: '1.3em', height: '1.3em', marginRight: '0.4em', verticalAlign: 'middle' };
 
     useEffect(() => {
-    const fetchTranslations = async () => {
+    const getAllTranslations = async () => {
             try {
-                console.log('Fetching translations for projectId:', projectId, 'pageId:', pageId, 'translationKeyId:', translationKeyId);
                 const response = await getTranslations(projectId, pageId, translationKeyId);
-                console.log('Translations response:', response);
-                
-                let translationsArray = [];
                 if (Array.isArray(response)) {
-                    translationsArray = response;
-                } else if (response && Array.isArray(response.data)) {
-                    translationsArray = response.data;
-                } else if (response && typeof response === 'object') {
-                    translationsArray = Object.values(response);
+                    setTranslations(response);
                 } else {
-                    translationsArray = [];
+                    console.error('Expected array but got:', response);
+                    setTranslations([]);
                 }
-
-                setTranslations(translationsArray);
             } catch (error) {
                 console.error('Error fetching translations:', error);
                 setTranslations([]);
             }
         };
 
+        const getProjectTargetLanguages = async () => {
+            try {
+                const project = await getProjectById(projectId);
+                if (project && project.targetLanguages) {
+                    const languages = project.targetLanguages.split(',').map(lang => lang.trim());
+                    setProjectTargetLanguages(languages);
+                    console.log('Project target languages:', languages);
+                } else {
+                    setProjectTargetLanguages([]);
+                }
+            } catch (error) {
+                console.error('Error fetching project:', error);
+                setProjectTargetLanguages([]);
+            }
+        };
+
         if (projectId && pageId && translationKeyId) {
-            fetchTranslations();
+            getAllTranslations();
+            getProjectTargetLanguages();
         }
     }, [projectId, pageId, translationKeyId]);
-
-    useEffect(() => {
-        if (editingTranslation && isModalVisible) {
-            form.setFieldsValue({
-                targetLanguage: editingTranslation.targetLanguage,
-                translatedText: editingTranslation.translatedText,
-                status: editingTranslation.status,
-                notes: editingTranslation.notes
-            });
-        }
-    }, [editingTranslation, isModalVisible, form]);
 
     const handleCreateTranslation = () => {
         setEditingTranslation(null);
@@ -79,24 +79,43 @@ const Translations = () => {
         setIsModalVisible(true);
     };
 
-    const handleDeleteTranslation = async (translationId) => {
-        await deleteTranslation(projectId, pageId, translationKeyId, translationId);
-        setTranslations(translations.filter(translation => translation.id !== translationId));
+    const handleSubmit = async (values) => {
+        try {
+            const translationData = {
+                targetLanguage: values.targetLanguage,
+                translatedText: values.translatedText,
+                status: values.status,
+                notes: values.notes
+            };
+            if (editingTranslation) {
+                await updateTranslation(projectId, pageId, translationKeyId, editingTranslation.id, translationData);
+                const updatedList = await getTranslations(projectId, pageId, translationKeyId);
+                setTranslations(updatedList);
+            } else {
+                const newKey = await createTranslation(projectId, pageId, translationKeyId, translationData);
+                if (newKey) {
+                    setTranslations(prev => [...prev, newKey]);
+                } else {
+                    const refreshedList = await getTranslations(projectId, pageId, translationKeyId);
+                    setTranslations(refreshedList);
+                }
+            }
+            setIsModalVisible(false);
+            form.resetFields();
+        } catch (error) {
+            console.error('Failed to save translation:', error);
+        }
     };
 
-    const handleSubmit = async (values) => {
-        if (editingTranslation) {
-            await updateTranslation(projectId, pageId, translationKeyId, editingTranslation.id, values);
-            const response = await getTranslations(projectId, pageId, translationKeyId);
-            setTranslations(response);
-        } else {
-            await createTranslation(projectId, pageId, translationKeyId, values);
-            const response = await getTranslations(projectId, pageId, translationKeyId);
-            setTranslations(response);
+    const handleDeleteTranslation = async (translationId) => {
+        try {
+            await deleteTranslation(projectId, pageId, translationKeyId, translationId);
+            setTranslations(translations.filter(translation => translation.id !== translationId));
+            setDeleteConfirmation(null);
+        } catch (error) {
+            console.error('Failed to delete translation:', error);
         }
-        setIsModalVisible(false);
-        form.resetFields();
-    };
+    }
 
     return (
         <div className="translations-container">
@@ -145,7 +164,7 @@ const Translations = () => {
                             let color = 'green';
                             if (text === 'IN_REVIEW') color = 'orange';
                             else if (text === 'REJECTED') color = 'red';
-                            else if(text === 'PENDING') color = 'grey';
+                            else if(text === 'PENDING') color = 'yellow';
                             return <Tag color={color}>{text}</Tag>;
                         }
                     },
@@ -173,13 +192,35 @@ const Translations = () => {
                         render: (_, record) => (
                             <>
                                 <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdateTranslation(record)} />
-                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => handleDeleteTranslation(record.id)} />
+                                <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => setDeleteConfirmation({ id: record.id, translatedText: record.translatedText })} />
                             </>
                         ),
                     },
                 ]}
             />
-
+            <Modal
+                title="Delete Translation"
+                open={!!deleteConfirmation}
+                onCancel={() => setDeleteConfirmation(null)}
+                footer={null}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                    <GoAlertFill style={{ color: '#ff4d4f', fontSize: '48px', marginRight: '12px' }} />
+                    <div>
+                        <p style={{ margin: 10, fontSize: '16px', fontWeight: '500' }}>
+                            Are you sure you want to delete <strong>{deleteConfirmation?.translatedText}</strong>?
+                        </p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                    <Button onClick={() => setDeleteConfirmation(null)}>
+                        Cancel
+                    </Button>
+                    <Button type="primary" danger onClick={() => handleDeleteTranslation(deleteConfirmation?.id)}>
+                        Delete
+                    </Button>
+                </div>
+            </Modal>
             <Modal
                 title={editingTranslation ? 'Edit Translation' : 'Create Translation'}
                 open={isModalVisible}
@@ -187,37 +228,48 @@ const Translations = () => {
                 footer={null}
                 >
                 <Form
-                        labelCol={{ span: 7 }} wrapperCol={{ span: 18 }}
-                        layout="horizontal" 
-                        form={form}
-                        onFinish={handleSubmit}
-                        initialValues={editingTranslation ? { 
-                            targetLanguage: editingTranslation.targetLanguage,
-                            translatedText: editingTranslation.translatedText,
-                            status: editingTranslation.status,
-                            notes: editingTranslation.notes,
-                        } : {
-                            status: 'PENDING' // Default status for new translations
-                        }}
-                    >
-                    <Form.Item label="Target Language" name="targetLanguage" rules={[{ required: true, message: 'Please enter the target language' }]}>
-                        <Input placeholder="Enter target language" />
+                    labelCol={{ span: 7 }} wrapperCol={{ span: 18 }}
+                    layout="horizontal" 
+                    form={form}
+                    onFinish={handleSubmit}
+                    initialValues={editingTranslation ? { targetLanguage: editingTranslation.targetLanguage, translatedText: editingTranslation.translatedText, status: editingTranslation.status, notes: editingTranslation.notes } : {}}
+                >
+                    <Form.Item label="Target Language" name="targetLanguage" rules={[{ required: true, message: 'Please select a target language' }]}>
+                        <Select placeholder="Select target language">
+                            {projectTargetLanguages.map(language => {
+                                const code = languageToCountryCode[language];
+                                return (
+                                    <Select.Option key={language} value={language}>
+                                        {code && <ReactCountryFlag countryCode={code} svg style={{...flagStyle, marginRight: '8px'}} />}
+                                        {language}
+                                    </Select.Option>
+                                );
+                            })}
+                        </Select>
                     </Form.Item>
                     <Form.Item label="Translated Text" name="translatedText" rules={[{ required: true, message: 'Please enter the translated text' }]}>
                         <Input.TextArea rows={2} placeholder="Enter translated text" />
                     </Form.Item>
-                    <Form.Item label="Status" name="status" rules={[{ required: true, message: 'Please select the status' }]}>
-                        <Select placeholder="Select status">
-                            <Select.Option value="PENDING">Pending</Select.Option>
-                            <Select.Option value="APPROVED">Approved</Select.Option>
-                            <Select.Option value="IN_REVIEW">In Review</Select.Option>
-                            <Select.Option value="REJECTED">Rejected</Select.Option>
-                        </Select>
+                    <Form.Item label="Notes" name="notes" rules={[{ required: true, message: 'Please enter translation remarks' }]}>
+                        <Input.TextArea rows={2} placeholder="Enter translation remarks" />
                     </Form.Item>
-                    <Form.Item label="Notes" name="notes">
-                        <Input.TextArea rows={2} placeholder="Enter notes" />
-                    </Form.Item>
-                    <Form.Item>
+                    {editingTranslation && (
+                        <Form.Item
+                            name="status"
+                            label="Status"
+                            className="form-input"
+                            rules={[{ required: true, message: 'Please select status' }]}
+                        >
+                            <Select placeholder="Select page status">
+                            {['PENDING', 'APPROVED', 'IN_REVIEW', 'REJECTED'].map(status => (
+                                <Select.Option key={status} value={status}>
+                                    {status}
+                                </Select.Option>
+                            ))}
+                            </Select>
+                        </Form.Item>
+                        )}
+                    <Form.Item style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <Button type="primary" htmlType="submit">
                             {editingTranslation ? 'Update Translation' : 'Create Translation'}
                         </Button>
