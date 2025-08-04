@@ -4,6 +4,7 @@ import com.example.TransManage.Model.User;
 import com.example.TransManage.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,9 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -25,8 +29,7 @@ public class AuthController {
             
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                // Note: In production, use proper password hashing (BCrypt)
-                if (user.getPassword().equals(loginRequest.getPassword())) {
+                if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                     Map<String, Object> response = new HashMap<>();
                     response.put("success", true);
                     response.put("message", "Login successful");
@@ -73,11 +76,13 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(errorResponse);
             }
 
+            String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
+
             // Create new user
             User newUser = new User(
                 registerRequest.getUsername(),
                 registerRequest.getEmail(),
-                registerRequest.getPassword(),
+                encodedPassword,
                 registerRequest.getFirstName(),
                 registerRequest.getLastName(),
                 User.UserRole.USER

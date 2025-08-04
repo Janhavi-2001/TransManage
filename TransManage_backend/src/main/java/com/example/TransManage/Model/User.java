@@ -21,10 +21,10 @@ public class User {
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String password;
     
-    @Column(name = "first_name", columnDefinition = "VARCHAR(255)")
+    @Column(name = "first_name", nullable = false, columnDefinition = "VARCHAR(255)")
     private String firstName;
     
-    @Column(name = "last_name", columnDefinition = "VARCHAR(255)")
+    @Column(name = "last_name", nullable = false, columnDefinition = "VARCHAR(255)")
     private String lastName;
     
     @Enumerated(EnumType.STRING)
