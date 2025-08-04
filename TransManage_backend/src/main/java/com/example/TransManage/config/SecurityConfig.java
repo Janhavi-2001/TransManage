@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Arrays;
 
 @Configuration
@@ -18,10 +19,22 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/h2-console/**")
+                .disable()
+            )
+            .headers(headers -> headers
+                .frameOptions().disable()
+            )
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/login", "/register", "/css/**", "/js/**", "/static/**").permitAll()
                 .requestMatchers("/", "/home", "/contact").permitAll()
@@ -41,11 +54,11 @@ public class SecurityConfig {
 
         return http.build();
     }
-
+    
     @Bean
     public UserDetailsService userDetailsService() {
         var admin = User.withUsername("admin")
-                       .password("{noop}admin123") // {noop} means no encoding; don't use in production
+                       .password("{noop}admin123")
                        .roles("USER", "ADMIN")
                        .build();
         
