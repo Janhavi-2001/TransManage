@@ -8,10 +8,12 @@ import { getProjects, createProject, updateProject, deleteProject } from '../../
 import languageToCountryCode from '../../../Data/languageToCountryCode';
 import ReactCountryFlag from 'react-country-flag';
 import { GoAlertFill } from "react-icons/go";
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 const Projects = () => {
 
+    const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
@@ -39,7 +41,7 @@ const Projects = () => {
     }, []);
 
     const handleViewProject = (id) => {
-        window.location.href = `/projects/${id}`;
+        navigate(`/projects/${id}`);
     }
 
     const handleCreateProject = () => {

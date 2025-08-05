@@ -2,13 +2,48 @@ import { useState } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import './Login.css';
 import { MailOutlined, KeyOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../../api/loginAPI';
+import Loader from '../Loader/Loader';
 
 const Login = () => {
     const [loading, setLoading] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
+    const [form] = Form.useForm();
+    const navigate = useNavigate();
 
-    const onFinish = (values) => {
-        message.success('Login attempted!');
+    const onFinish = async (values) => {
+        const { email, password } = values;
+
+        if (!email || !password) {
+            message.error('Please fill in all fields!');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const responseMessage = await loginUser({ email, password });
+            message.success(responseMessage);
+            form.resetFields();
+        
+            setTimeout(() => {
+                setRedirecting(true);
+                setLoading(false);
+            }, 1500);
+
+            setTimeout(() => {
+                navigate('/dashboard');
+            }, 4000);
+
+        } catch (error) {
+            message.error(error.message);
+            setLoading(false);
+        }
     };
+
+    if (redirecting) {
+        return <Loader />;
+    }
     
     return (
         <>
@@ -17,6 +52,7 @@ const Login = () => {
                 <h2>Log In To Your Account</h2>
                 <br></br>
                 <Form
+                    form={form}
                     name="login"
                     initialValues={{ remember: true }}
                     onFinish={onFinish}

@@ -25,7 +25,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername());
+            Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
             
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
@@ -112,14 +112,14 @@ public class AuthController {
 
     // Inner classes for request bodies
     public static class LoginRequest {
-        private String username;
+        private String email;
         private String password;
 
-        public String getUsername() { 
-            return username; 
+        public String getEmail() { 
+            return email; 
         }
-        public void setUsername(String username) { 
-            this.username = username; 
+        public void setEmail(String email) { 
+            this.email = email; 
         }
         public String getPassword() { 
             return password; 
