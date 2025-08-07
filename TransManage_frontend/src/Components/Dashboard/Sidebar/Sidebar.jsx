@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { SolutionOutlined, TranslationOutlined, ProjectOutlined } from '@ant-design/icons';
+import { SolutionOutlined, ProjectOutlined } from '@ant-design/icons';
 import './Sidebar.css';
 import { useState, useEffect } from 'react';
 import { getProjects } from '../../../api/projectsApi';

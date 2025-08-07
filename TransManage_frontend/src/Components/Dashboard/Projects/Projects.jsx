@@ -8,7 +8,7 @@ import { getProjects, createProject, updateProject, deleteProject } from '../../
 import languageToCountryCode from '../../../Data/languageToCountryCode';
 import ReactCountryFlag from 'react-country-flag';
 import { GoAlertFill } from "react-icons/go";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 const Projects = () => {
