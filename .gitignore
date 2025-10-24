@@ -35,16 +35,11 @@ out/
 
 ### VS Code ###
 .vscode/
+.env
 
 ### React ###
 node_modules/
 build/
-
-### H2 Database ###
-./data/
-*.mv.db
-*.trace.db
-*.lock.db
 
 ### Log files ###
 *.log
