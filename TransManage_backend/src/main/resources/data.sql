@@ -49,7 +49,8 @@ VALUES
 (4, 2, 'home_button', 'Home Button Text', 'Start', 'Main button on home screen.', 'BUTTON', TRUE, 20, NOW(), NOW()),
 
 -- Mobile App Localization - Settings Page
-(5, 2, 'settings_title', 'Settings Page Title', 'Settings', 'Title displayed at the top of the settings screen.', 'TITLE', TRUE, 80, NOW(), NOW());
+(5, 2, 'settings_title', 'Settings Page Title', 'Settings', 'Title displayed at the top of the settings screen.', 'TITLE', TRUE, 80, NOW(), NOW())
+ON CONFLICT (trans_key) DO NOTHING;
 
 
 -- Dummy data for the 'translation' table
