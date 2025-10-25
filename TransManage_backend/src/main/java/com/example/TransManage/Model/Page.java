@@ -14,6 +14,7 @@ public class Page {
         COMPLETED,
         PENDING,
         ON_HOLD,
+        IN_REVIEW,
         CANCELLED
     }
 

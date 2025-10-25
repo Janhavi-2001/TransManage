@@ -1,5 +1,5 @@
 # Use a Java + Gradle image
-FROM gradle:8.3-jdk17 AS build
+FROM gradle:jdk21 AS build
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY build.gradle settings.gradle gradlew ./
 COPY gradle ./gradle
 
 # Download dependencies
-RUN ./gradlew build -x test --no-daemon || true
+RUN sed -i 's/\r$//' ./gradlew && chmod +x ./gradlew
 
 # Copy source code
 COPY src ./src
