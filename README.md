@@ -30,7 +30,7 @@ A simple translation management system made using React and Spring Boot
 - Spring Boot
 - REST APIs
 - JSON
-- H2 database
+- PostgreSQL + Docker-containerization
 
 
 
