@@ -1,8 +1,10 @@
 package com.example.TransManage.Controller;
 
 import com.example.TransManage.Model.Project;
+import com.example.TransManage.Model.AiReviewResponse;
 import com.example.TransManage.Model.Translation;
 import com.example.TransManage.Repository.TranslationRepository;
+import com.example.TransManage.Service.AiReviewService;
 import com.example.TransManage.Repository.ProjectRepository;
 
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +18,18 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:3000")
 
 public class TranslationController {
+    private final AiReviewService aiReviewService;
     private final TranslationRepository translationRepository;
     private final ProjectRepository projectRepository;
 
-    public TranslationController(TranslationRepository translationRepository, ProjectRepository projectRepository) {
-        this.translationRepository = translationRepository;
-        this.projectRepository = projectRepository;
-    }
+    public TranslationController(
+            TranslationRepository translationRepository,
+            ProjectRepository projectRepository,
+            AiReviewService aiReviewService) {
+                this.translationRepository = translationRepository;
+                this.projectRepository = projectRepository;
+                this.aiReviewService = aiReviewService;
+            }
 
     // Test method to check if the controller is working
     @GetMapping("/test")
@@ -95,5 +102,21 @@ public class TranslationController {
     public Translation getTranslationById(@PathVariable Long translationId) {
         Optional<Translation> translation = translationRepository.findById(translationId);
         return translation.orElse(null);
+    }
+
+    // Method to include an AI-assisted translation quality check
+    @PostMapping("/{translationId}/ai-review")
+    public AiReviewResponse reviewTranslation(
+            @PathVariable Long projectId,
+            @PathVariable Long pageId,
+            @PathVariable Long translationKeyId,
+            @PathVariable Long translationId) {
+
+        return aiReviewService.reviewTranslation(
+            projectId,
+            pageId,
+            translationKeyId,
+            translationId
+        );
     }
 }
