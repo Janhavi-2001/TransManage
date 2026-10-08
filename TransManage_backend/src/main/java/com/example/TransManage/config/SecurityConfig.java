@@ -25,9 +25,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf().disable()
+            .csrf(csrf -> csrf.disable())
             .headers(headers -> headers
-                .frameOptions().disable()
+                .frameOptions(frameOptions -> frameOptions.disable())
             )
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/h2-console/**").permitAll()
