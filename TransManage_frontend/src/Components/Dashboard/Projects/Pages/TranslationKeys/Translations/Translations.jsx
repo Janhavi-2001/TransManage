@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button, Modal, Form, Input, Table, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, RightOutlined } from '@ant-design/icons';
-import { getTranslations, createTranslation, updateTranslation, deleteTranslation } from '../../../../../../api/translationsApi';
+import { Button, Modal, Form, Input, Table, Tag, Alert, List, Progress } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, RightOutlined, RobotOutlined } from '@ant-design/icons';
+import { getTranslations, createTranslation, updateTranslation, deleteTranslation, reviewTranslation } from '../../../../../../api/translationsApi';
 import { getProjectById } from '../../../../../../api/projectsApi'; // Add this import
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -21,6 +21,11 @@ const Translations = () => {
     const { id: projectId, pageId, translationKeyId } = useParams();
     const [deleteConfirmation, setDeleteConfirmation] = useState(null);
     const [projectTargetLanguages, setProjectTargetLanguages] = useState([]);
+    const [reviewResult, setReviewResult] = useState(null);
+    const [reviewedTranslation, setReviewedTranslation] = useState(null);
+    const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
+    const [isReviewLoading, setIsReviewLoading] = useState(false);
+    const [reviewError, setReviewError] = useState(null);
 
     const flagStyle = { width: '1.3em', height: '1.3em', marginRight: '0.4em', verticalAlign: 'middle' };
 
@@ -117,6 +122,39 @@ const Translations = () => {
         }
     }
 
+    const handleReviewTranslation = async (translation) => {
+        setReviewedTranslation(translation);
+        setReviewResult(null);
+        setReviewError(null);
+        setIsReviewModalVisible(true);
+        setIsReviewLoading(true);
+
+        try {
+            const result = await reviewTranslation(projectId, pageId, translationKeyId, translation.id);
+            setReviewResult(result);
+        } catch (error) {
+            setReviewError(error.message || 'Unable to review this translation.');
+        } finally {
+            setIsReviewLoading(false);
+        }
+    };
+
+    const handleApplySuggestion = () => {
+        if (!reviewedTranslation || !reviewResult?.suggestedText) {
+            return;
+        }
+
+        setEditingTranslation(reviewedTranslation);
+        form.setFieldsValue({
+            targetLanguage: reviewedTranslation.targetLanguage,
+            translatedText: reviewResult.suggestedText,
+            status: reviewedTranslation.status,
+            notes: reviewedTranslation.notes
+        });
+        setIsReviewModalVisible(false);
+        setIsModalVisible(true);
+    };
+
     return (
         <div className="translations-container">
         <Sidebar />
@@ -191,6 +229,13 @@ const Translations = () => {
                         key: 'actions',
                         render: (_, record) => (
                             <>
+                                <Button
+                                    className="ai-review-button"
+                                    icon={<RobotOutlined />}
+                                    loading={isReviewLoading && reviewedTranslation?.id === record.id}
+                                    onClick={() => handleReviewTranslation(record)}
+                                >
+                                </Button>
                                 <Button className="edit-button" icon={<EditOutlined />} onClick={() => handleUpdateTranslation(record)} />
                                 <Button className="delete-button" icon={<DeleteOutlined />} onClick={() => setDeleteConfirmation({ id: record.id, translatedText: record.translatedText })} />
                             </>
@@ -220,6 +265,51 @@ const Translations = () => {
                         Delete
                     </Button>
                 </div>
+            </Modal>
+            <Modal
+                title="AI Translation Review"
+                open={isReviewModalVisible}
+                onCancel={() => setIsReviewModalVisible(false)}
+                footer={reviewResult ? [
+                    <Button key="close" onClick={() => setIsReviewModalVisible(false)}>
+                        Close
+                    </Button>,
+                    <Button key="apply" type="primary" onClick={handleApplySuggestion}>
+                        Apply Suggestion
+                    </Button>
+                ] : null}
+            >
+                {isReviewLoading && <Progress percent={50} status="active" showInfo={false} />}
+                {reviewError && <Alert type="error" message={reviewError} showIcon />}
+                {reviewResult && (
+                    <div className="ai-review-result">
+                        <div className="ai-review-score">
+                            <span>Quality score</span>
+                            <Progress
+                                type="circle"
+                                percent={reviewResult.score}
+                                size={80}
+                                status={reviewResult.score >= 80 ? 'success' : 'exception'}
+                            />
+                        </div>
+                        <Tag color={reviewResult.recommendation === 'APPROVED' ? 'green' : 'orange'}>
+                            {reviewResult.recommendation}
+                        </Tag>
+                        <h4>Review issues</h4>
+                        {reviewResult.issues?.length ? (
+                            <List
+                                size="small"
+                                bordered
+                                dataSource={reviewResult.issues}
+                                renderItem={(issue) => <List.Item>{issue}</List.Item>}
+                            />
+                        ) : (
+                            <Alert type="success" message="No issues found" showIcon />
+                        )}
+                        <h4>Suggested text</h4>
+                        <p className="ai-suggested-text">{reviewResult.suggestedText || 'No suggestion available'}</p>
+                    </div>
+                )}
             </Modal>
             <Modal
                 title={editingTranslation ? 'Edit Translation' : 'Create Translation'}

@@ -82,3 +82,21 @@ export const getTranslationById = async (projectId, pageId, translationKeyId) =>
         throw error;
     }
 };
+
+export const reviewTranslation = async (projectId, pageId, translationKeyId, translationId) => {
+    try {
+        const res = await fetch(`${API_BASE}/${projectId}/pages/${pageId}/translation-keys/${translationKeyId}/translations/${translationId}/ai-review`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error reviewing translation:', error);
+        throw error;
+    }
+};
