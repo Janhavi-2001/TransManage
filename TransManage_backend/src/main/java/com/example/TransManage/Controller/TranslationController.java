@@ -2,7 +2,9 @@ package com.example.TransManage.Controller;
 
 import com.example.TransManage.Model.Project;
 import com.example.TransManage.Model.AiReviewResponse;
+import com.example.TransManage.Model.AiReviewHistory;
 import com.example.TransManage.Model.Translation;
+import com.example.TransManage.Repository.AiReviewHistoryRepository;
 import com.example.TransManage.Repository.TranslationRepository;
 import com.example.TransManage.Service.AiReviewService;
 import com.example.TransManage.Repository.ProjectRepository;
@@ -21,14 +23,17 @@ public class TranslationController {
     private final AiReviewService aiReviewService;
     private final TranslationRepository translationRepository;
     private final ProjectRepository projectRepository;
+    private final AiReviewHistoryRepository aiReviewHistoryRepository;
 
     public TranslationController(
             TranslationRepository translationRepository,
             ProjectRepository projectRepository,
-            AiReviewService aiReviewService) {
+            AiReviewService aiReviewService,
+            AiReviewHistoryRepository aiReviewHistoryRepository) {
                 this.translationRepository = translationRepository;
                 this.projectRepository = projectRepository;
                 this.aiReviewService = aiReviewService;
+                this.aiReviewHistoryRepository = aiReviewHistoryRepository;
             }
 
     // Test method to check if the controller is working
@@ -119,5 +124,10 @@ public class TranslationController {
             translationKeyId,
             translationId
         );
+    }
+
+    @GetMapping("/{translationId}/ai-review-history")
+    public List<AiReviewHistory> getReviewHistory(@PathVariable Long translationId) {
+        return aiReviewHistoryRepository.findByTranslationIdOrderByCreatedAtDesc(translationId);
     }
 }

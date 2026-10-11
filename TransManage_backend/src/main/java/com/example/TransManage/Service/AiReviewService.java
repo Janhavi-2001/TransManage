@@ -1,8 +1,11 @@
 package com.example.TransManage.Service;
 
 import com.example.TransManage.Model.AiReviewResponse;
+import com.example.TransManage.Model.AiReviewHistory;
+import com.example.TransManage.Model.AiBatchReviewItem;
 import com.example.TransManage.Model.Translation;
 import com.example.TransManage.Model.TranslationKey;
+import com.example.TransManage.Repository.AiReviewHistoryRepository;
 import com.example.TransManage.Repository.TranslationKeyRepository;
 import com.example.TransManage.Repository.TranslationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,10 +25,15 @@ import java.util.regex.Pattern;
 
 @Service
 public class AiReviewService {
-	private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{[^}]+}|%[sd]|\\$\\d+");
+	private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{[A-Za-z][A-Za-z0-9_.-]*}|%[sd]|\\$\\d+");
+	private static final Pattern ICU_VARIABLE_PATTERN = Pattern.compile("\\{\\s*([A-Za-z][A-Za-z0-9_.-]*)\\s*(?:,\\s*(plural|selectordinal|select)\\s*,)?");
+	private static final Pattern HTML_TAG_PATTERN = Pattern.compile("</?[A-Za-z][^>]*>");
+	private static final Pattern URL_PATTERN = Pattern.compile("https?://[^\\s<>()\\\"]+");
+	private static final Pattern NUMBER_PATTERN = Pattern.compile("(?<![A-Za-z0-9])[-+]?\\d+(?:[.,]\\d+)?%?");
 
 	private final TranslationRepository translationRepository;
 	private final TranslationKeyRepository translationKeyRepository;
+	private final AiReviewHistoryRepository aiReviewHistoryRepository;
 	private final RestClient aiClient;
 	private final ObjectMapper objectMapper;
 	private final String aiApiKey;
@@ -34,6 +42,7 @@ public class AiReviewService {
 	public AiReviewService(
 			TranslationRepository translationRepository,
 			TranslationKeyRepository translationKeyRepository,
+			AiReviewHistoryRepository aiReviewHistoryRepository,
 			RestClient.Builder restClientBuilder,
 			ObjectMapper objectMapper,
 			@Value("${ai.api-key:}") String aiApiKey,
@@ -41,6 +50,7 @@ public class AiReviewService {
 			@Value("${ai.model:gpt-4o-mini}") String aiModel) {
 		this.translationRepository = translationRepository;
 		this.translationKeyRepository = translationKeyRepository;
+		this.aiReviewHistoryRepository = aiReviewHistoryRepository;
 		this.aiClient = restClientBuilder.baseUrl(aiBaseUrl).build();
 		this.objectMapper = objectMapper;
 		this.aiApiKey = aiApiKey;
@@ -60,16 +70,55 @@ public class AiReviewService {
 		String translatedText = translation.getTranslatedText();
 		List<String> localIssues = collectLocalIssues(translationKey, translatedText);
 
-		if (aiApiKey.isBlank()) {
-			return localReview(translatedText, localIssues,
-					"AI provider is not configured; only local checks were run");
+		AiReviewResponse review;
+		try {
+			if (aiApiKey.isBlank()) {
+				review = localReview(translatedText, localIssues,
+						"AI provider is not configured; only local checks were run");
+			} else {
+				review = requestAiReview(translationKey, translation, localIssues);
+			}
+		} catch (RuntimeException exception) {
+			review = localReview(translatedText, localIssues,
+					"AI provider was unavailable; only local checks were run");
 		}
 
+		saveReviewHistory(projectId, pageId, translationKeyId, translationId, review);
+		return review;
+	}
+
+	public List<AiBatchReviewItem> reviewPage(Long projectId, Long pageId) {
+		List<AiBatchReviewItem> reviews = new ArrayList<>();
+		for (Translation translation : translationRepository.findByPageId(pageId)) {
+			AiReviewResponse review = reviewTranslation(
+					projectId,
+					pageId,
+					translation.getTranslationKeyId(),
+					translation.getId());
+			reviews.add(new AiBatchReviewItem(translation.getId(), review));
+		}
+		return reviews;
+	}
+
+	private void saveReviewHistory(
+			Long projectId,
+			Long pageId,
+			Long translationKeyId,
+			Long translationId,
+			AiReviewResponse review) {
 		try {
-			return requestAiReview(translationKey, translation, localIssues);
-		} catch (RuntimeException exception) {
-			return localReview(translatedText, localIssues,
-					"AI provider was unavailable; only local checks were run");
+			aiReviewHistoryRepository.save(new AiReviewHistory(
+					projectId,
+					pageId,
+					translationKeyId,
+					translationId,
+					review.score(),
+					objectMapper.writeValueAsString(review.issues()),
+					review.suggestedText(),
+					review.recommendation(),
+					aiModel));
+		} catch (Exception exception) {
+			throw new IllegalStateException("Unable to save AI review history", exception);
 		}
 	}
 
@@ -102,6 +151,25 @@ public class AiReviewService {
 		Set<String> translatedPlaceholders = extractPlaceholders(translatedText);
 		if (!translatedPlaceholders.containsAll(sourcePlaceholders)) {
 			issues.add("Translation is missing one or more placeholders from the source text");
+		}
+
+		if (!extractIcuVariables(translationKey.getSourceText()).equals(extractIcuVariables(translatedText))) {
+			issues.add("Translation changes one or more ICU placeholders");
+		}
+
+		if (!extractMatches(HTML_TAG_PATTERN, translationKey.getSourceText())
+				.equals(extractMatches(HTML_TAG_PATTERN, translatedText))) {
+			issues.add("Translation does not preserve the source HTML tags");
+		}
+
+		if (!extractMatches(URL_PATTERN, translationKey.getSourceText())
+				.equals(extractMatches(URL_PATTERN, translatedText))) {
+			issues.add("Translation does not preserve the source URLs");
+		}
+
+		if (!extractMatches(NUMBER_PATTERN, translationKey.getSourceText())
+				.equals(extractMatches(NUMBER_PATTERN, translatedText))) {
+			issues.add("Translation does not preserve the source numbers");
 		}
 		return issues;
 	}
@@ -183,12 +251,31 @@ public class AiReviewService {
 	}
 
 	private Set<String> extractPlaceholders(String text) {
+		return extractMatches(PLACEHOLDER_PATTERN, text);
+	}
+
+	private Set<String> extractIcuVariables(String text) {
+		Set<String> variables = new HashSet<>();
+		if (text == null) {
+			return variables;
+		}
+
+		Matcher matcher = ICU_VARIABLE_PATTERN.matcher(text);
+		while (matcher.find()) {
+			if (matcher.group(2) != null) {
+				variables.add(matcher.group(1) + ":" + matcher.group(2));
+			}
+		}
+		return variables;
+	}
+
+	private Set<String> extractMatches(Pattern pattern, String text) {
 		Set<String> placeholders = new HashSet<>();
 		if (text == null) {
 			return placeholders;
 		}
 
-		Matcher matcher = PLACEHOLDER_PATTERN.matcher(text);
+		Matcher matcher = pattern.matcher(text);
 		while (matcher.find()) {
 			placeholders.add(matcher.group());
 		}

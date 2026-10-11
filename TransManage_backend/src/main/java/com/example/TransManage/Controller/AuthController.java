@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,13 +24,14 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
         try {
             Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
             
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                    session.setAttribute("AUTHENTICATED_USER_ID", user.getId());
                     Map<String, Object> response = new HashMap<>();
                     response.put("success", true);
                     response.put("message", "Login successful");
