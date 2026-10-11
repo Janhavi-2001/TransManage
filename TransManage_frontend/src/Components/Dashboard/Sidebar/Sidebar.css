@@ -6,6 +6,7 @@
   height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .sidebar nav {

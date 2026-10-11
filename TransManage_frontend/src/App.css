@@ -8,3 +8,67 @@
     min-height: 100vh;
     overflow-x: hidden;
 }
+
+.App .dashboard-container,
+.App .projects-container,
+.App .pages-container,
+.App .translation-keys-container,
+.App .translations-container {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+.App .dashboard-container > .sidebar,
+.App .projects-container > .sidebar,
+.App .pages-container > .sidebar,
+.App .translation-keys-container > .sidebar,
+.App .translations-container > .sidebar {
+    flex: 0 0 230px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+}
+
+.App .main-content,
+.App .projects-content,
+.App .pages-content,
+.App .translation-keys-content,
+.App .translations-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.App .projects-content .ant-table-wrapper,
+.App .pages-content .ant-table-wrapper,
+.App .translation-keys-content .ant-table-wrapper,
+.App .translations-content .ant-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .App .dashboard-container > .sidebar,
+    .App .projects-container > .sidebar,
+    .App .pages-container > .sidebar,
+    .App .translation-keys-container > .sidebar,
+    .App .translations-container > .sidebar {
+        flex: 0 0 auto;
+        position: relative;
+    }
+
+    .App .dashboard-container,
+    .App .projects-container,
+    .App .pages-container,
+    .App .translation-keys-container,
+    .App .translations-container {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
