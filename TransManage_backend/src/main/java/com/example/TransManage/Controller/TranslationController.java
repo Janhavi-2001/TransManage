@@ -79,13 +79,14 @@ public class TranslationController {
         Translation existingTranslation = translationRepository.findById(translationId)
             .orElseThrow(() -> new RuntimeException("Translation not found"));
 
+        existingTranslation.setTargetLanguage(translation.getTargetLanguage());
         existingTranslation.setTranslatedText(translation.getTranslatedText());
         existingTranslation.setStatus(translation.getStatus());
         existingTranslation.setNotes(translation.getNotes());
 
-        existingTranslation.setProjectId(translation.getProjectId());
-        existingTranslation.setPageId(translation.getPageId());
-        existingTranslation.setTranslationKeyId(translation.getTranslationKeyId());
+        existingTranslation.setProjectId(projectId);
+        existingTranslation.setPageId(pageId);
+        existingTranslation.setTranslationKeyId(translationKeyId);
 
         return translationRepository.save(existingTranslation);
     }
