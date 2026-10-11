@@ -42,7 +42,7 @@ class AiReviewServiceTest {
 
     @Test
     void returnsLocalIssuesWhenAiProviderIsNotConfigured() {
-        TranslationKey translationKey = translationKey("Hello {username}", 10);
+        TranslationKey translationKey = translationKey("Hello {username}", 5);
         Translation translation = translation("Bonjour");
         when(translationRepository.findById(20L)).thenReturn(Optional.of(translation));
         when(translationKeyRepository.findById(30L)).thenReturn(Optional.of(translationKey));
