@@ -7,10 +7,10 @@ export const registerUser = async ({ firstName, lastName, username, email, passw
         body: JSON.stringify({ firstName, lastName, username, email, password }),
     });
 
-    const data = await response.text();
+    const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data || 'Registration failed');
+        throw new Error(data.message || 'Registration failed');
     }
 
     return data;

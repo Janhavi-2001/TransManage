@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button, Modal, Form, Input, Table, Tag, Alert, List, Progress } from 'antd';
+import { Button, Modal, Form, Input, Table, Tag, Alert, List, Progress, notification } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, RightOutlined, RobotOutlined } from '@ant-design/icons';
-import { getTranslations, createTranslation, updateTranslation, deleteTranslation, reviewTranslation } from '../../../../../../api/translationsApi';
+import { getTranslations, createTranslation, updateTranslation, deleteTranslation, reviewTranslation, reviewPageTranslations } from '../../../../../../api/translationsApi';
 import { getProjectById } from '../../../../../../api/projectsApi'; // Add this import
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -14,6 +14,7 @@ import { GoAlertFill } from 'react-icons/go';
 
 
 const Translations = () => {
+    const [notificationApi, notificationContextHolder] = notification.useNotification();
     const [translations, setTranslations] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingTranslation, setEditingTranslation] = useState(null);
@@ -26,6 +27,12 @@ const Translations = () => {
     const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
     const [isReviewLoading, setIsReviewLoading] = useState(false);
     const [reviewError, setReviewError] = useState(null);
+    const [saveError, setSaveError] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [batchReviewResults, setBatchReviewResults] = useState([]);
+    const [isBatchReviewVisible, setIsBatchReviewVisible] = useState(false);
+    const [isBatchReviewLoading, setIsBatchReviewLoading] = useState(false);
+    const [batchReviewError, setBatchReviewError] = useState(null);
 
     const flagStyle = { width: '1.3em', height: '1.3em', marginRight: '0.4em', verticalAlign: 'middle' };
 
@@ -69,12 +76,14 @@ const Translations = () => {
 
     const handleCreateTranslation = () => {
         setEditingTranslation(null);
+        setSaveError(null);
         form.resetFields();
         setIsModalVisible(true);
     };
 
     const handleUpdateTranslation = (translation) => {
         setEditingTranslation(translation);
+        setSaveError(null);
         form.setFieldsValue({
             targetLanguage: translation.targetLanguage,
             translatedText: translation.translatedText,
@@ -85,6 +94,8 @@ const Translations = () => {
     };
 
     const handleSubmit = async (values) => {
+        setSaveError(null);
+        setIsSaving(true);
         try {
             const translationData = {
                 targetLanguage: values.targetLanguage,
@@ -93,9 +104,23 @@ const Translations = () => {
                 notes: values.notes
             };
             if (editingTranslation) {
-                await updateTranslation(projectId, pageId, translationKeyId, editingTranslation.id, translationData);
-                const updatedList = await getTranslations(projectId, pageId, translationKeyId);
-                setTranslations(updatedList);
+                const updatedTranslation = await updateTranslation(
+                    projectId,
+                    pageId,
+                    translationKeyId,
+                    editingTranslation.id,
+                    translationData
+                );
+                setTranslations(prev => prev.map(translation =>
+                    translation.id === updatedTranslation.id ? updatedTranslation : translation
+                ));
+                notificationApi.success({
+                    message: 'Translation updated',
+                    description: 'The translation was updated successfully.',
+                    placement: 'top',
+                    duration: 0,
+                    className: 'translation-success-notification',
+                });
             } else {
                 const newKey = await createTranslation(projectId, pageId, translationKeyId, translationData);
                 if (newKey) {
@@ -109,6 +134,9 @@ const Translations = () => {
             form.resetFields();
         } catch (error) {
             console.error('Failed to save translation:', error);
+            setSaveError(error.message || 'Unable to save the translation.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -139,11 +167,28 @@ const Translations = () => {
         }
     };
 
+    const handleBatchReview = async () => {
+        setBatchReviewResults([]);
+        setBatchReviewError(null);
+        setIsBatchReviewVisible(true);
+        setIsBatchReviewLoading(true);
+
+        try {
+            const results = await reviewPageTranslations(projectId, pageId);
+            setBatchReviewResults(Array.isArray(results) ? results : []);
+        } catch (error) {
+            setBatchReviewError(error.message || 'Unable to review page translations.');
+        } finally {
+            setIsBatchReviewLoading(false);
+        }
+    };
+
     const handleApplySuggestion = () => {
         if (!reviewedTranslation || !reviewResult?.suggestedText) {
             return;
         }
 
+        setSaveError(null);
         setEditingTranslation(reviewedTranslation);
         form.setFieldsValue({
             targetLanguage: reviewedTranslation.targetLanguage,
@@ -157,6 +202,7 @@ const Translations = () => {
 
     return (
         <div className="translations-container">
+        {notificationContextHolder}
         <Sidebar />
             <div className="translations-content">
             <h3>
@@ -167,6 +213,9 @@ const Translations = () => {
                 <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Translation Keys</span>
                 <span style = {{ color: '#525252'}}><RightOutlined style={{ fontSize: '12px', marginRight: '4px', marginLeft: '4px' }}/> Translations</span>
             </h3>
+            <Button type="default" icon={<RobotOutlined />} onClick={handleBatchReview} className="batch-review-button">
+                Review Page Translations
+            </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleCreateTranslation} className="create-translations-button"> Add Translation </Button>
 
             <Table
@@ -312,11 +361,40 @@ const Translations = () => {
                 )}
             </Modal>
             <Modal
+                title="Page Translation Review"
+                open={isBatchReviewVisible}
+                onCancel={() => setIsBatchReviewVisible(false)}
+                footer={null}
+            >
+                {isBatchReviewLoading && <Progress percent={50} status="active" showInfo={false} />}
+                {batchReviewError && <Alert type="error" message={batchReviewError} showIcon />}
+                {!isBatchReviewLoading && !batchReviewError && (
+                    <List
+                        bordered
+                        dataSource={batchReviewResults}
+                        locale={{ emptyText: 'No translations found for this page.' }}
+                        renderItem={({ translationId, review }) => (
+                            <List.Item>
+                                <List.Item.Meta
+                                    title={`Translation ${translationId} - ${review.recommendation} (${review.score}/100)`}
+                                    description={review.issues?.length ? review.issues.join(' ') : 'No issues found'}
+                                />
+                                <span>{review.suggestedText || 'No suggestion'}</span>
+                            </List.Item>
+                        )}
+                    />
+                )}
+            </Modal>
+            <Modal
                 title={editingTranslation ? 'Edit Translation' : 'Create Translation'}
                 open={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
+                onCancel={() => {
+                    setSaveError(null);
+                    setIsModalVisible(false);
+                }}
                 footer={null}
                 >
+                {saveError && <Alert type="error" message={saveError} showIcon />}
                 <Form
                     labelCol={{ span: 7 }} wrapperCol={{ span: 18 }}
                     layout="horizontal" 
@@ -340,7 +418,7 @@ const Translations = () => {
                     <Form.Item label="Translated Text" name="translatedText" rules={[{ required: true, message: 'Please enter the translated text' }]}>
                         <Input.TextArea rows={2} placeholder="Enter translated text" />
                     </Form.Item>
-                    <Form.Item label="Notes" name="notes" rules={[{ required: true, message: 'Please enter translation remarks' }]}>
+                    <Form.Item label="Notes" name="notes">
                         <Input.TextArea rows={2} placeholder="Enter translation remarks" />
                     </Form.Item>
                     {editingTranslation && (
@@ -360,7 +438,7 @@ const Translations = () => {
                         </Form.Item>
                         )}
                     <Form.Item style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" loading={isSaving}>
                             {editingTranslation ? 'Update Translation' : 'Create Translation'}
                         </Button>
                     </Form.Item>

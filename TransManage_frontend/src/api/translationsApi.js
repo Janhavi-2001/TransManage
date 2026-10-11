@@ -57,6 +57,9 @@ export const deleteTranslation = async (projectId, pageId, translationKeyId, tra
             method: 'DELETE',
         });
         if (!res.ok) {
+            if (res.status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         
@@ -90,13 +93,39 @@ export const reviewTranslation = async (projectId, pageId, translationKeyId, tra
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
         });
         if (!res.ok) {
+            if (res.status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
             throw new Error(`HTTP error! status: ${res.status}`);
         }
         return await res.json();
     } catch (error) {
         console.error('Error reviewing translation:', error);
+        throw error;
+    }
+};
+
+export const reviewPageTranslations = async (projectId, pageId) => {
+    try {
+        const res = await fetch(`${API_BASE}/${projectId}/pages/${pageId}/ai-review`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+        if (!res.ok) {
+            if (res.status === 401) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Error reviewing page translations:', error);
         throw error;
     }
 };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Form, Input, message, Row, Col, Modal } from 'antd';
+import { Button, Form, Input, Row, Col, Modal } from 'antd';
 import './Register.css';
 import { UserOutlined, MailOutlined, KeyOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { registerUser } from '../../api/registerAPI';
 const Register = () => {
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
@@ -16,18 +17,17 @@ const Register = () => {
         const { firstName, lastName, username, email, password, confirmPassword } = values;
 
         if (password !== confirmPassword) {
-            message.error('Passwords do not match!');
+            setErrorMessage('Passwords do not match.');
             return;
         }
 
         setLoading(true);
         try {
-            const responseMessage = await registerUser({ firstName, lastName, username, email, password });
-            message.success(responseMessage);
+            await registerUser({ firstName, lastName, username, email, password });
             form.resetFields()
             setIsModalVisible(true);
         } catch (error) {
-            message.error(error.message);
+            setErrorMessage(error.message || 'Unable to create the account.');
         } finally {
             setLoading(false);
         }
@@ -142,6 +142,16 @@ const Register = () => {
                         </p>
                     </div>
                 </div>
+            </Modal>
+            <Modal
+                title="Unable to create account"
+                open={Boolean(errorMessage)}
+                onOk={() => setErrorMessage('')}
+                onCancel={() => setErrorMessage('')}
+                okText="Close"
+                cancelButtonProps={{ style: { display: 'none' } }}
+            >
+                <p>{errorMessage}</p>
             </Modal>
         </>
     );

@@ -103,6 +103,16 @@
   border-radius: 4px;
   white-space: pre-wrap;
 }
+.translation-success-notification {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+}
+.translation-success-notification .ant-notification-notice-message {
+  color: #135200;
+}
+.translation-success-notification .ant-notification-notice-description {
+  color: #389e0d;
+}
 .projects-item .status {
   font-size: 14px;
 }

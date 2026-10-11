@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Form, Input, message } from 'antd';
+import { Button, Form, Input, Modal } from 'antd';
 import './Login.css';
 import { MailOutlined, KeyOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import Loader from '../Loader/Loader';
 const Login = () => {
     const [loading, setLoading] = useState(false);
     const [redirecting, setRedirecting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
@@ -16,27 +17,20 @@ const Login = () => {
         const { email, password } = values;
 
         if (!email || !password) {
-            message.error('Please fill in all fields!');
+            setErrorMessage('Please fill in all fields.');
             return;
         }
 
         setLoading(true);
         try {
-            const responseMessage = await loginUser({ email, password });
-            message.success(responseMessage);
+            await loginUser({ email, password });
             form.resetFields();
-        
-            setTimeout(() => {
-                setRedirecting(true);
-                setLoading(false);
-            }, 1500);
-
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 4000);
+            setRedirecting(true);
+            setLoading(false);
+            navigate('/dashboard');
 
         } catch (error) {
-            message.error(error.message);
+            setErrorMessage(error.message || 'Unable to log in.');
             setLoading(false);
         }
     };
@@ -84,6 +78,16 @@ const Login = () => {
                 <p>Don't have an account? <a href="/register">Sign Up</a></p>
             </div>
             </div>
+            <Modal
+                title="Unable to log in"
+                open={Boolean(errorMessage)}
+                onOk={() => setErrorMessage('')}
+                onCancel={() => setErrorMessage('')}
+                okText="Close"
+                cancelButtonProps={{ style: { display: 'none' } }}
+            >
+                <p>{errorMessage}</p>
+            </Modal>
         </>
 );
 };
