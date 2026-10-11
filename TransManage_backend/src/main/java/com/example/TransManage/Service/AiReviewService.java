@@ -61,16 +61,29 @@ public class AiReviewService {
 		List<String> localIssues = collectLocalIssues(translationKey, translatedText);
 
 		if (aiApiKey.isBlank()) {
-			List<String> issues = new ArrayList<>(localIssues);
-			issues.add("AI provider is not configured; only local checks were run");
-			return new AiReviewResponse(
-					localScore(localIssues),
-					issues,
-					translatedText,
-					"REVIEW_REQUIRED");
+			return localReview(translatedText, localIssues,
+					"AI provider is not configured; only local checks were run");
 		}
 
-		return requestAiReview(translationKey, translation, localIssues);
+		try {
+			return requestAiReview(translationKey, translation, localIssues);
+		} catch (RuntimeException exception) {
+			return localReview(translatedText, localIssues,
+					"AI provider was unavailable; only local checks were run");
+		}
+	}
+
+	private AiReviewResponse localReview(
+			String translatedText,
+			List<String> localIssues,
+			String providerIssue) {
+		List<String> issues = new ArrayList<>(localIssues);
+		issues.add(providerIssue);
+		return new AiReviewResponse(
+				localScore(localIssues),
+				issues,
+				translatedText,
+				"REVIEW_REQUIRED");
 	}
 
 	private List<String> collectLocalIssues(TranslationKey translationKey, String translatedText) {
